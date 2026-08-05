@@ -153,10 +153,10 @@ body.balances-hidden .acct-balance .masked{ display:inline; }
 .acct-chip .dot-badge{ width:18px; height:18px; border-radius:6px; font-size:8px; display:flex; align-items:center; justify-content:center; font-weight:800; color:#241C10; }
 
 /* ---- amount / keypad (Catat) ---- */
-.catat-viewport{ flex:1; overflow:hidden; position:relative; display:flex; }
-.catat-track{ display:flex; width:300%; height:100%; transition:transform .42s cubic-bezier(.32,.72,0,1); }
+.catat-viewport{ flex:1; overflow:hidden; position:relative; }
+.catat-track{ display:flex; height:100%; transition:transform .42s cubic-bezier(.32,.72,0,1); will-change:transform; }
 .catat-track.no-anim{ transition:none; }
-.catat-step{ width:33.3333%; height:100%; overflow-y:auto; flex:none; box-sizing:border-box; }
+.catat-step{ height:100%; overflow-y:auto; flex:none; box-sizing:border-box; }
 .catat-step::-webkit-scrollbar{ display:none; }
 .amount-display{ text-align:center; margin:26px 0 20px; }
 .amount-display .cur{ font-size:15px; color:var(--text-muted); margin-bottom:4px; }

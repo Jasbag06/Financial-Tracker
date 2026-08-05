@@ -23,19 +23,40 @@ Catetin.quickadd.reset = function () {
   document.querySelectorAll('#recurring-row .chip').forEach(function (c) { c.classList.toggle('active', c.dataset.recurring === 'false'); });
 
   Catetin.quickadd.renderCategoryGrid();
+  Catetin.quickadd.layoutTrack();
   Catetin.quickadd.goStep(0, true);
+};
+
+// Pixel-based sizing (instead of width:300% / 33.3333%) sidesteps an iOS Safari bug
+// where overflow:hidden fails to clip a percentage-widthed flex child under a CSS
+// transform, which made all 3 steps render side-by-side instead of sliding.
+Catetin.quickadd.layoutTrack = function () {
+  var viewport = document.getElementById('catat-viewport');
+  var track = document.getElementById('catat-track');
+  var steps = track.querySelectorAll('.catat-step');
+  var w = viewport.clientWidth;
+  track.style.width = (w * steps.length) + 'px';
+  steps.forEach(function (step) { step.style.width = w + 'px'; });
+  Catetin.quickadd._stepWidth = w;
 };
 
 Catetin.quickadd.goStep = function (n, noAnim) {
   n = Math.max(0, Math.min(2, n));
   Catetin.quickadd.step = n;
   var track = document.getElementById('catat-track');
+  var w = Catetin.quickadd._stepWidth || document.getElementById('catat-viewport').clientWidth;
   if (noAnim) track.classList.add('no-anim');
-  track.style.transform = 'translateX(-' + (n * 33.3333) + '%)';
+  track.style.transform = 'translateX(-' + (n * w) + 'px)';
   if (noAnim) {
     requestAnimationFrame(function () { requestAnimationFrame(function () { track.classList.remove('no-anim'); }); });
   }
 };
+
+window.addEventListener('resize', function () {
+  if (Catetin.router.current !== 'catat') return;
+  Catetin.quickadd.layoutTrack();
+  Catetin.quickadd.goStep(Catetin.quickadd.step, true);
+});
 
 document.getElementById('type-toggle').addEventListener('click', function (e) {
   var btn = e.target.closest('.opt'); if (!btn) return;
