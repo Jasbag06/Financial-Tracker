@@ -260,6 +260,18 @@ body.balances-hidden .acct-balance .masked{ display:inline; }
 }
 .toast.show{ opacity:1; transform:translate(-50%,0); }
 
+/* ---- modal (replaces window.prompt/confirm, which iOS disables in standalone PWAs) ---- */
+.modal-overlay{ position:fixed; inset:0; background:rgba(20,16,10,.5); display:flex; align-items:flex-end; justify-content:center; z-index:200; }
+.modal-sheet{ background:var(--surface); border-radius:22px 22px 0 0; padding:22px 20px calc(env(safe-area-inset-bottom) + 20px); width:100%; max-width:480px; max-height:80vh; overflow-y:auto; }
+.modal-title{ font-size:16px; font-weight:700; margin:0 0 12px; }
+.modal-msg{ font-size:13.5px; color:var(--text-muted); margin:0 0 16px; line-height:1.5; }
+.modal-input{ width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; padding:11px 12px; font-size:14px; color:var(--text); margin-bottom:16px; }
+.modal-actions{ display:flex; gap:10px; }
+.modal-actions .cta{ margin-top:0; flex:1; }
+.icon-picker{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:16px; }
+.icon-picker button{ aspect-ratio:1; border-radius:12px; border:1.5px solid var(--border); background:var(--surface-2); font-size:19px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; }
+.icon-picker button.active{ border-color:var(--coral); background:var(--surface); }
+
 @media (prefers-reduced-motion: reduce){
   .catat-track, .cta, .txn, .switch .knob, .toast, .catat-toast{ transition:none !important; }
 }

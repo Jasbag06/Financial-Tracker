@@ -97,7 +97,8 @@ Catetin.renderTripDetail = function () {
 document.getElementById('btn-trip-delete').addEventListener('click', async function () {
   var trip = Catetin.state.trips.find(function (t) { return t.id === Catetin.currentTripId; });
   if (!trip) return;
-  if (!window.confirm('Hapus acara "' + trip.name + '"? Transaksinya tetap tersimpan, cuma jadi transaksi Umum lagi.')) return;
+  var ok = await Catetin.modal.confirm({ title: 'Hapus acara "' + trip.name + '"?', message: 'Transaksinya tetap tersimpan, cuma jadi transaksi Umum lagi.', danger: true, confirmLabel: 'Hapus' });
+  if (!ok) return;
   var { error } = await Catetin.supabase.from('trips').delete().eq('id', trip.id);
   if (error) { Catetin.toast('Gagal menghapus acara'); return; }
   await Catetin.reloadAll();

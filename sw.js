@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catetin-shell-v5';
+const CACHE_NAME = 'catetin-shell-v6';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const SHELL_FILES = [
   './js/supabase-client.js',
   './js/state.js',
   './js/util.js',
+  './js/modal.js',
   './js/auth.js',
   './js/router.js',
   './js/dashboard.js',

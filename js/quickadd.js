@@ -113,11 +113,10 @@ Catetin.quickadd.renderCategoryGrid = function () {
   });
 
   document.getElementById('btn-add-cat-inline').addEventListener('click', async function () {
-    var name = window.prompt('Nama kategori baru:');
-    if (!name) return;
-    var icon = window.prompt('Ikon emoji (cth. 🐾):', '📦') || '📦';
+    var result = await Catetin.modal.addCategory();
+    if (!result) return;
     var { error } = await Catetin.supabase.from('categories').insert({
-      user_id: Catetin.state.user.id, name: name.trim(), type: Catetin.quickadd.type, icon: icon,
+      user_id: Catetin.state.user.id, name: result.name, type: Catetin.quickadd.type, icon: result.icon,
       sort_order: cats.length + 1
     });
     if (error) { Catetin.toast('Gagal menambah kategori'); return; }
@@ -153,10 +152,10 @@ Catetin.quickadd.renderTripChips = function () {
   row.querySelectorAll('.chip').forEach(function (chip) {
     chip.addEventListener('click', async function () {
       if (chip.dataset.tripId === 'new') {
-        var name = window.prompt('Nama acara baru (cth. Pergi ke Bandung):');
+        var name = await Catetin.modal.prompt({ title: 'Acara Baru', placeholder: 'cth. Pergi ke Bandung' });
         if (!name) return;
         var { data, error } = await Catetin.supabase.from('trips').insert({
-          user_id: Catetin.state.user.id, name: name.trim(), icon: '🧳', start_date: new Date().toISOString().slice(0, 10)
+          user_id: Catetin.state.user.id, name: name, icon: '🧳', start_date: new Date().toISOString().slice(0, 10)
         }).select().single();
         if (error) { Catetin.toast('Gagal membuat acara'); return; }
         await Catetin.reloadAll();

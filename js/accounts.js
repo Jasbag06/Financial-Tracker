@@ -14,7 +14,8 @@ Catetin.renderManageAccounts = function () {
   }).join('');
   el.querySelectorAll('[data-del-acct]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
-      if (!window.confirm('Hapus akun ini? Transaksi lama tetap tersimpan.')) return;
+      var ok = await Catetin.modal.confirm({ title: 'Hapus akun ini?', message: 'Transaksi lama tetap tersimpan.', danger: true, confirmLabel: 'Hapus' });
+      if (!ok) return;
       var { error } = await Catetin.supabase.from('payment_sources').delete().eq('id', btn.dataset.delAcct);
       if (error) { Catetin.toast('Gagal menghapus'); return; }
       await Catetin.reloadAll();

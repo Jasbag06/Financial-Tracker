@@ -1,6 +1,7 @@
 window.Catetin = window.Catetin || {};
 
 Catetin.manageCatType = 'expense';
+Catetin.newCatIcon = Catetin.ICON_CHOICES[0];
 
 Catetin.router.onEnter['manage-categories'] = function () {
   Catetin.manageCatType = 'expense';
@@ -9,6 +10,22 @@ Catetin.router.onEnter['manage-categories'] = function () {
     b.style.color = b.dataset.type === 'expense' ? 'var(--coral-ink)' : '';
   });
   Catetin.renderManageCategories();
+  Catetin.renderNewCatIconPicker();
+};
+
+Catetin.renderNewCatIconPicker = function () {
+  Catetin.newCatIcon = Catetin.ICON_CHOICES[0];
+  var picker = document.getElementById('new-cat-icon-picker');
+  picker.innerHTML = Catetin.ICON_CHOICES.map(function (ic, i) {
+    return '<button type="button" data-icon="' + ic + '" class="' + (i === 0 ? 'active' : '') + '">' + ic + '</button>';
+  }).join('');
+  picker.querySelectorAll('button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      picker.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      Catetin.newCatIcon = btn.dataset.icon;
+    });
+  });
 };
 
 document.getElementById('manage-cat-type-toggle').addEventListener('click', function (e) {
@@ -31,7 +48,8 @@ Catetin.renderManageCategories = function () {
   }).join('');
   el.querySelectorAll('[data-del-cat]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
-      if (!window.confirm('Hapus kategori ini?')) return;
+      var ok = await Catetin.modal.confirm({ title: 'Hapus kategori ini?', danger: true, confirmLabel: 'Hapus' });
+      if (!ok) return;
       var { error } = await Catetin.supabase.from('categories').delete().eq('id', btn.dataset.delCat);
       if (error) { Catetin.toast('Gagal menghapus (mungkin masih dipakai transaksi)'); return; }
       await Catetin.reloadAll();
@@ -44,16 +62,16 @@ Catetin.renderManageCategories = function () {
 document.getElementById('add-category-form').addEventListener('submit', async function (e) {
   e.preventDefault();
   var name = document.getElementById('new-cat-name').value.trim();
-  var icon = document.getElementById('new-cat-icon').value.trim() || '📦';
   var budget = document.getElementById('new-cat-budget').value;
   var sameType = Catetin.state.categories.filter(function (c) { return c.type === Catetin.manageCatType; });
   var { error } = await Catetin.supabase.from('categories').insert({
-    user_id: Catetin.state.user.id, name: name, type: Catetin.manageCatType, icon: icon,
+    user_id: Catetin.state.user.id, name: name, type: Catetin.manageCatType, icon: Catetin.newCatIcon,
     budget_monthly: budget ? Number(budget) : null,
     sort_order: sameType.length + 1
   });
   if (error) { Catetin.toast('Gagal menambah kategori'); return; }
   this.reset();
+  Catetin.renderNewCatIconPicker();
   await Catetin.reloadAll();
   Catetin.renderManageCategories();
   Catetin.updateSettingsCounts();

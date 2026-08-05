@@ -123,7 +123,8 @@ Catetin.renderTxnGroups = function (containerId, list, onChange) {
   container.querySelectorAll('[data-del]').forEach(function (btn) {
     btn.addEventListener('click', async function (e) {
       e.stopPropagation();
-      if (!window.confirm('Hapus transaksi ini?')) return;
+      var ok = await Catetin.modal.confirm({ title: 'Hapus transaksi ini?', danger: true, confirmLabel: 'Hapus' });
+      if (!ok) return;
       var { error } = await Catetin.supabase.from('transactions').delete().eq('id', btn.dataset.del);
       if (error) { Catetin.toast('Gagal menghapus'); return; }
       await Catetin.reloadAll();
@@ -139,12 +140,9 @@ Catetin.renderTxnGroups = function (containerId, list, onChange) {
 Catetin.editTransaction = async function (id, onChange) {
   var t = Catetin.state.transactions.find(function (x) { return x.id === id; });
   if (!t) return;
-  var newAmountStr = window.prompt('Ubah jumlah:', t.amount);
-  if (newAmountStr === null) return;
-  var newAmount = Number(String(newAmountStr).replace(/\D/g, ''));
-  if (!newAmount || newAmount <= 0) { Catetin.toast('Jumlah tidak valid'); return; }
-  var newNote = window.prompt('Ubah catatan (kosongkan jika tidak ada):', t.note || '');
-  var { error } = await Catetin.supabase.from('transactions').update({ amount: newAmount, note: newNote || null }).eq('id', id);
+  var result = await Catetin.modal.editTransaction(t);
+  if (!result) return;
+  var { error } = await Catetin.supabase.from('transactions').update({ amount: result.amount, note: result.note }).eq('id', id);
   if (error) { Catetin.toast('Gagal mengubah'); return; }
   await Catetin.reloadAll();
   onChange();

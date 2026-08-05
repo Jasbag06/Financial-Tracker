@@ -63,12 +63,13 @@ document.getElementById('auth-form').addEventListener('submit', async function (
 });
 
 document.getElementById('btn-logout').addEventListener('click', async function () {
-  if (!window.confirm('Keluar dari Catetin?')) return;
+  var ok = await Catetin.modal.confirm({ title: 'Keluar dari Catetin?', confirmLabel: 'Keluar', danger: true });
+  if (!ok) return;
   await Catetin.supabase.auth.signOut();
 });
 
 document.getElementById('btn-change-password').addEventListener('click', async function () {
-  var pw = window.prompt('Kata sandi baru (minimal 6 karakter):');
+  var pw = await Catetin.modal.prompt({ title: 'Kata Sandi Baru', placeholder: 'Minimal 6 karakter', type: 'password', confirmLabel: 'Ubah' });
   if (!pw) return;
   if (pw.length < 6) { Catetin.toast('Kata sandi minimal 6 karakter'); return; }
   var { error } = await Catetin.supabase.auth.updateUser({ password: pw });

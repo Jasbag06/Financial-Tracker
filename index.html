@@ -317,7 +317,10 @@
     <div class="section-title">Tambah Kategori</div>
     <form id="add-category-form" class="card">
       <div class="field"><label for="new-cat-name">Nama</label><input type="text" id="new-cat-name" placeholder="cth. Peliharaan" required></div>
-      <div class="field"><label for="new-cat-icon">Ikon (emoji)</label><input type="text" id="new-cat-icon" placeholder="🐾" maxlength="4" required></div>
+      <div class="field">
+        <label>Ikon</label>
+        <div class="icon-picker" id="new-cat-icon-picker"></div>
+      </div>
       <div class="field"><label for="new-cat-budget">Budget Bulanan (opsional)</label><input type="number" id="new-cat-budget" placeholder="cth. 300000" min="0" step="1000"></div>
       <button type="submit" class="cta">Tambah</button>
     </form>
@@ -454,12 +457,17 @@
 
 <div class="toast" id="global-toast"></div>
 
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal-sheet" id="modal-sheet"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/state.js"></script>
 <script src="js/util.js"></script>
+<script src="js/modal.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/router.js"></script>
 <script src="js/dashboard.js"></script>
