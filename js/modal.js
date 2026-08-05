@@ -104,6 +104,42 @@ Catetin.modal.addCategory = function () {
   });
 };
 
+Catetin.modal.editCategory = function (cat) {
+  return new Promise(function (resolve) {
+    var selected = cat.icon;
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Ubah Kategori</p>'
+      + '<input type="text" id="modal-cat-name" class="modal-input" value="' + Catetin.escapeHtml(cat.name) + '" placeholder="Nama kategori">'
+      + '<div class="icon-picker" id="modal-icon-picker">'
+      + Catetin.ICON_CHOICES.map(function (ic) { return '<button type="button" data-icon="' + ic + '" class="' + (ic === selected ? 'active' : '') + '">' + ic + '</button>'; }).join('')
+      + '</div>'
+      + '<input type="number" id="modal-cat-budget" class="modal-input" placeholder="Budget bulanan (opsional)" value="' + (cat.budget_monthly || '') + '" min="0" step="1000">'
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
+      + '<button type="button" class="cta" id="modal-ok">Simpan</button>'
+      + '</div>',
+      function () { resolve(null); }
+    );
+    sheet.querySelectorAll('#modal-icon-picker button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        sheet.querySelectorAll('#modal-icon-picker button').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        selected = btn.dataset.icon;
+      });
+    });
+    var nameInput = sheet.querySelector('#modal-cat-name');
+    setTimeout(function () { nameInput.focus(); }, 50);
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      var budgetVal = sheet.querySelector('#modal-cat-budget').value;
+      Catetin.modal._hide();
+      resolve({ name: name, icon: selected, budget_monthly: budgetVal ? Number(budgetVal) : null });
+    });
+  });
+};
+
 Catetin.modal.editTransaction = function (t) {
   return new Promise(function (resolve) {
     var sheet = Catetin.modal._show(

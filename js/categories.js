@@ -44,8 +44,25 @@ Catetin.renderManageCategories = function () {
   el.innerHTML = cats.map(function (c) {
     return '<div class="setting-row" style="cursor:default;"><div class="icon-chip" style="background:var(--surface-2);">' + c.icon + '</div>'
       + '<div class="label">' + Catetin.escapeHtml(c.name) + (c.budget_monthly ? '<div class="muted" style="font-size:11px;font-weight:400;">Budget ' + Catetin.fmtRp(c.budget_monthly) + '</div>' : '') + '</div>'
+      + '<button type="button" class="link" data-edit-cat="' + c.id + '" style="margin-right:12px;">Edit</button>'
       + '<button type="button" class="link" data-del-cat="' + c.id + '" style="color:var(--coral-ink);">Hapus</button></div>';
   }).join('');
+  el.querySelectorAll('[data-edit-cat]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var cat = Catetin.state.categories.find(function (c) { return c.id === btn.dataset.editCat; });
+      if (!cat) return;
+      var result = await Catetin.modal.editCategory(cat);
+      if (!result) return;
+      var { error } = await Catetin.supabase.from('categories').update({
+        name: result.name, icon: result.icon, budget_monthly: result.budget_monthly
+      }).eq('id', cat.id);
+      if (error) { Catetin.toast('Gagal mengubah kategori'); return; }
+      await Catetin.reloadAll();
+      Catetin.renderManageCategories();
+      Catetin.updateSettingsCounts();
+      Catetin.toast('Kategori diperbarui');
+    });
+  });
   el.querySelectorAll('[data-del-cat]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
       var ok = await Catetin.modal.confirm({ title: 'Hapus kategori ini?', danger: true, confirmLabel: 'Hapus' });
