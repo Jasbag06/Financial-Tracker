@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catetin-shell-v4';
+const CACHE_NAME = 'catetin-shell-v5';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -37,10 +37,19 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Network-first (falling back to cache only when offline) so shell updates are
+// visible immediately whenever there's a connection — cache is purely an offline
+// safety net, not the default source.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return; // Supabase / CDN requests always go to network
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
