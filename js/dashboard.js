@@ -17,18 +17,13 @@ Catetin.renderDashboard = function () {
   var expense = monthTx.filter(function (t) { return t.type === 'expense'; }).reduce(function (s, t) { return s + Number(t.amount); }, 0);
   var incomePct = (income + expense) > 0 ? Math.round(income / (income + expense) * 100) : 50;
 
-  var totalHtml = '<div class="acct-total-card"><div class="acct-top">'
+  var html = '<div class="acct-card total"><div class="acct-top">'
     + '<div><div class="acct-name" style="font-size:11.5px;opacity:.7;font-weight:600;">All Accounts</div><div class="acct-sub" style="opacity:.8;">' + accounts.length + ' accounts</div></div>'
     + '<button class="eye-toggle" id="btn-eye-toggle" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>'
     + '<div class="acct-balance mono"><span class="real">' + Catetin.fmtRp(total) + '</span><span class="masked">Rp •• •••</span></div>'
     + '<div class="split-bar" style="margin-top:12px;"><div style="width:' + incomePct + '%;background:var(--mint);"></div><div style="width:' + (100 - incomePct) + '%;background:var(--coral);"></div></div>'
     + '<div class="split-legend"><span style="color:var(--mint);">● In ' + Catetin.fmtShort(income) + '</span><span style="color:var(--coral);">● Out ' + Catetin.fmtShort(expense) + '</span></div></div>';
-  document.getElementById('acct-total-card').innerHTML = totalHtml;
-  document.getElementById('btn-eye-toggle').addEventListener('click', function () {
-    document.body.classList.toggle('balances-hidden');
-  });
 
-  var html = '';
   accounts.forEach(function (a) {
     var bal = Catetin.computeBalance(a);
     var initials = a.name.slice(0, 2).toUpperCase();
@@ -41,6 +36,9 @@ Catetin.renderDashboard = function () {
   html += '<div class="add-acct-card" data-nav="add-account"><div class="plus-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Add Bank</span></div>';
 
   document.getElementById('acct-scroll').innerHTML = html;
+  document.getElementById('btn-eye-toggle').addEventListener('click', function () {
+    document.body.classList.toggle('balances-hidden');
+  });
 
   Catetin.renderTripCardsOnDashboard();
   Catetin.renderDonut(monthTx.filter(function (t) { return t.type === 'expense'; }));
