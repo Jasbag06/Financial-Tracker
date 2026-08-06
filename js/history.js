@@ -1,9 +1,9 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.history = { type: '', category: '', tripFilter: '', dateFrom: '', dateTo: '' };
+Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '' };
 
 Catetin.router.onEnter.history = function () {
-  Catetin.history = { type: '', category: '', tripFilter: '', dateFrom: '', dateTo: '' };
+  Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '' };
   document.querySelectorAll('#history-type-toggle .opt').forEach(function (b) { b.classList.toggle('active', b.dataset.type === ''); });
   document.getElementById('history-filter-panel').hidden = true;
   document.getElementById('history-date-from').value = '';
@@ -22,6 +22,19 @@ Catetin.renderHistoryFilters = function () {
       catWrap.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
       chip.classList.add('active');
       Catetin.history.category = chip.dataset.cat;
+      Catetin.renderHistory();
+    });
+  });
+
+  var acctWrap = document.getElementById('history-acct-filter');
+  var accounts = Catetin.state.accounts;
+  acctWrap.innerHTML = '<button type="button" class="chip active" data-acct="" style="flex:none;">All Accounts</button>'
+    + accounts.map(function (a) { return '<button type="button" class="chip" data-acct="' + Catetin.escapeHtml(a.name) + '" style="flex:none;">' + Catetin.escapeHtml(a.name) + '</button>'; }).join('');
+  acctWrap.querySelectorAll('.chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      acctWrap.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      Catetin.history.account = chip.dataset.acct;
       Catetin.renderHistory();
     });
   });
@@ -75,6 +88,7 @@ Catetin.renderHistory = function () {
   var list = Catetin.state.transactions.filter(function (t) {
     if (h.type && t.type !== h.type) return false;
     if (h.category && t.category !== h.category) return false;
+    if (h.account && t.payment_source !== h.account) return false;
     if (h.dateFrom && t.occurred_at < h.dateFrom) return false;
     if (h.dateTo && t.occurred_at > h.dateTo) return false;
     if (h.tripFilter === 'general' && t.trip_id) return false;
@@ -84,37 +98,51 @@ Catetin.renderHistory = function () {
   Catetin.renderTxnGroups('history-list', list, Catetin.renderHistory);
 };
 
-// Shared by History and Event detail — groups a transaction list by date
-// with tap-to-reveal edit/delete, then re-runs `onChange` after any mutation.
-Catetin.renderTxnGroups = function (containerId, list, onChange) {
+// Shared by History, Home, and Event detail — renders a transaction list with
+// tap-to-reveal edit/delete, then re-runs `onChange` after any mutation.
+// Grouped by date by default (History/Event detail); pass {grouped:false} for
+// a flat list that shows the date inline per row instead (Home).
+Catetin.renderTxnGroups = function (containerId, list, onChange, opts) {
+  opts = opts || {};
+  var grouped = opts.grouped !== false;
   var container = document.getElementById(containerId);
   if (list.length === 0) { container.innerHTML = '<div class="empty-state">No transactions</div>'; return; }
 
-  var groups = {};
-  var order = [];
-  list.forEach(function (t) {
-    if (!groups[t.occurred_at]) { groups[t.occurred_at] = []; order.push(t.occurred_at); }
-    groups[t.occurred_at].push(t);
-  });
+  function rowHtml(t, isLast) {
+    var cat = Catetin.state.categories.find(function (c) { return c.name === t.category; });
+    var icon = cat ? cat.icon : '💸';
+    var sign = t.type === 'income' ? '+' : '-';
+    var color = t.type === 'income' ? 'var(--mint-ink)' : 'var(--coral-ink)';
+    var trip = t.trip_id ? Catetin.state.trips.find(function (tr) { return tr.id === t.trip_id; }) : null;
+    var subParts = [Catetin.escapeHtml(t.payment_source)];
+    if (!grouped) subParts.push(Catetin.fmtDateShort(t.occurred_at));
+    if (t.note) subParts.push(Catetin.escapeHtml(t.note));
+    return '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Delete</button></div>'
+      + '<div class="txn" data-swipe-toggle><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
+      + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + (trip ? ' · ' + trip.icon + ' ' + Catetin.escapeHtml(trip.name) : '') + '</div><div class="sub">' + subParts.join(' · ') + '</div></div>'
+      + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div></div>'
+      + (isLast ? '' : '<hr class="divider"/>');
+  }
 
   var html = '';
-  order.forEach(function (date) {
-    html += '<div class="date-label">' + Catetin.fmtDateLabel(date) + '</div><div class="card" style="padding:6px 16px;">';
-    var rows = groups[date];
-    rows.forEach(function (t, i) {
-      var cat = Catetin.state.categories.find(function (c) { return c.name === t.category; });
-      var icon = cat ? cat.icon : '💸';
-      var sign = t.type === 'income' ? '+' : '-';
-      var color = t.type === 'income' ? 'var(--mint-ink)' : 'var(--coral-ink)';
-      var trip = t.trip_id ? Catetin.state.trips.find(function (tr) { return tr.id === t.trip_id; }) : null;
-      html += '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Delete</button></div>'
-        + '<div class="txn" data-swipe-toggle><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
-        + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + (trip ? ' · ' + trip.icon + ' ' + Catetin.escapeHtml(trip.name) : '') + '</div><div class="sub">' + Catetin.escapeHtml(t.payment_source) + (t.note ? ' · ' + Catetin.escapeHtml(t.note) : '') + '</div></div>'
-        + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div></div>'
-        + (i < rows.length - 1 ? '<hr class="divider"/>' : '');
+  if (grouped) {
+    var groups = {};
+    var order = [];
+    list.forEach(function (t) {
+      if (!groups[t.occurred_at]) { groups[t.occurred_at] = []; order.push(t.occurred_at); }
+      groups[t.occurred_at].push(t);
     });
+    order.forEach(function (date) {
+      html += '<div class="date-label">' + Catetin.fmtDateLabel(date) + '</div><div class="card" style="padding:6px 16px;">';
+      var rows = groups[date];
+      rows.forEach(function (t, i) { html += rowHtml(t, i === rows.length - 1); });
+      html += '</div>';
+    });
+  } else {
+    html += '<div class="card" style="padding:6px 16px;">';
+    list.forEach(function (t, i) { html += rowHtml(t, i === list.length - 1); });
     html += '</div>';
-  });
+  }
   container.innerHTML = html;
 
   container.querySelectorAll('[data-swipe-toggle]').forEach(function (row) {

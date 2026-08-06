@@ -20,6 +20,7 @@ Catetin.quickadd.reset = function () {
   });
   document.getElementById('btn-catat-next').disabled = true;
   document.getElementById('txn-note').value = '';
+  document.getElementById('txn-date').value = new Date().toISOString().slice(0, 10);
   document.querySelectorAll('#recurring-row .chip').forEach(function (c) { c.classList.toggle('active', c.dataset.recurring === 'false'); });
 
   Catetin.quickadd.renderCategoryGrid();
@@ -196,7 +197,7 @@ document.getElementById('btn-save-txn').addEventListener('click', async function
   var btn = this; btn.disabled = true;
   var { error } = await Catetin.supabase.from('transactions').insert({
     user_id: Catetin.state.user.id,
-    occurred_at: new Date().toISOString().slice(0, 10),
+    occurred_at: document.getElementById('txn-date').value || new Date().toISOString().slice(0, 10),
     type: qa.type,
     amount: Number(qa.amountStr),
     category: qa.category,

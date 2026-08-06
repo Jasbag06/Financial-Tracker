@@ -11,7 +11,7 @@ Catetin.tripCardHtml = function (trip) {
   return '<div class="trip-card" data-nav="trip-detail" data-trip-id="' + trip.id + '">'
     + '<div class="acct-top"><div class="acct-id"><div class="acct-badge" style="background:var(--yellow);">' + trip.icon + '</div>'
     + '<div><div class="acct-name">' + Catetin.escapeHtml(trip.name) + '</div><div class="acct-sub">' + Catetin.tripDateRangeLabel(trip) + ' · ' + Catetin.tripStatusLabel(trip) + '</div></div></div></div>'
-    + '<div class="trip-total mono">' + Catetin.fmtRp(Catetin.tripExpenseTotal(trip.id)) + '</div></div>';
+    + '<div class="trip-total mono"><span class="real">' + Catetin.fmtRp(Catetin.tripExpenseTotal(trip.id)) + '</span><span class="masked">Rp •• •••</span></div></div>';
 };
 
 Catetin.renderTripCardsOnDashboard = function () {

@@ -62,7 +62,13 @@ Catetin.reloadAll = async function () {
     Catetin.supabase.from('trips').select('*').eq('user_id', uid).order('start_date', { ascending: false })
   ]);
   Catetin.state.categories = catsRes.data || [];
-  Catetin.state.accounts = acctsRes.data || [];
+  // Cash always sorts last, however many other banks/wallets get added later.
+  Catetin.state.accounts = (acctsRes.data || []).slice().sort(function (a, b) {
+    var aCash = a.kind === 'cash' ? 1 : 0;
+    var bCash = b.kind === 'cash' ? 1 : 0;
+    if (aCash !== bCash) return aCash - bCash;
+    return (a.sort_order || 0) - (b.sort_order || 0);
+  });
   Catetin.state.transactions = txnsRes.data || [];
   Catetin.state.trips = tripsRes.data || [];
 };

@@ -38,7 +38,8 @@
       </button>
     </div>
 
-    <div class="acct-scroll" id="acct-scroll"></div>
+    <div id="acct-total-card"></div>
+    <div class="acct-scroll" id="acct-scroll" style="margin-top:10px;"></div>
 
     <div class="section-title between"><span>Events</span><button class="link" data-nav="trips">View all</button></div>
     <div class="acct-scroll" id="trip-scroll" style="margin-bottom:4px;"></div>
@@ -50,7 +51,7 @@
     </div>
 
     <div class="section-title between"><span>Recent Transactions</span><button class="link" data-nav="history">View all</button></div>
-    <div class="card" style="padding:6px 16px;" id="recent-txn-list"></div>
+    <div id="recent-txn-list"></div>
   </section>
 
   <!-- ============ ADD ============ -->
@@ -110,8 +111,10 @@
 
           <div class="field" style="margin-top:20px;">
             <label>Event (optional)</label>
-            <div class="chip-row" id="txn-trip-row" style="flex-wrap:nowrap;overflow-x:auto;"></div>
+            <div class="chip-row" id="txn-trip-row"></div>
           </div>
+
+          <div class="field"><label for="txn-date">Date</label><input type="date" id="txn-date"></div>
 
           <div class="field"><label for="txn-note">Note (optional)</label><input type="text" id="txn-note" placeholder="e.g. Lunch"></div>
 
@@ -156,6 +159,7 @@
         <button type="button" class="link" id="btn-history-clear-dates" style="align-self:flex-end;padding:11px 0;">Reset</button>
       </div>
       <div class="chip-row" id="history-cat-filter" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -18px 10px;padding:0 18px 2px;"></div>
+      <div class="chip-row" id="history-acct-filter" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -18px 10px;padding:0 18px 2px;"></div>
       <div class="chip-row" id="history-trip-filter" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -18px;padding:0 18px 2px;"></div>
     </div>
 
