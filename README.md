@@ -60,7 +60,7 @@ Instruksi yang sama juga ada di dalam app: **Pengaturan → Pasang ke Home Scree
 
 ## Ikon aplikasi
 
-`icons/icon.svg` adalah placeholder. `manifest.json` & `index.html` mereferensikan `icons/icon-192.png`, `icons/icon-512.png`, dan `icons/icon-192.png` sebagai apple-touch-icon — generate dari SVG itu (mis. lewat [realfavicongenerator.net](https://realfavicongenerator.net) atau `npx pwa-asset-generator icons/icon.svg icons`) sebelum deploy final, atau ganti dengan logo kamu sendiri.
+`icons/icon-180.png`, `icon-192.png`, dan `icon-512.png` sudah diisi dengan logo "F" (badge hitam bersudut potong di atas latar oranye). `icons/icon-master.png` (1024x1024) disimpan sebagai sumber resolusi tinggi kalau nanti mau generate ukuran lain atau ganti logo — tinggal replace ketiga file PNG itu dengan ukuran yang sama.
 
 ## Batasan yang perlu diketahui
 
