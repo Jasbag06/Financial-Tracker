@@ -142,7 +142,7 @@ Catetin.editTransaction = async function (id, onChange) {
   if (!t) return;
   var result = await Catetin.modal.editTransaction(t);
   if (!result) return;
-  var { error } = await Catetin.supabase.from('transactions').update({ amount: result.amount, note: result.note }).eq('id', id);
+  var { error } = await Catetin.supabase.from('transactions').update(result).eq('id', id);
   if (error) { Catetin.toast('Gagal mengubah'); return; }
   await Catetin.reloadAll();
   onChange();

@@ -10,8 +10,22 @@ Catetin.renderManageAccounts = function () {
     var bal = Catetin.computeBalance(a);
     return '<div class="setting-row" style="cursor:default;"><div class="icon-chip" style="background:var(--' + a.color + ');">' + a.name.slice(0, 2).toUpperCase() + '</div>'
       + '<div class="label">' + Catetin.escapeHtml(a.name) + '<div class="muted" style="font-size:11px;font-weight:400;">' + Catetin.fmtRp(bal) + '</div></div>'
+      + '<button type="button" class="link" data-edit-acct="' + a.id + '" style="margin-right:12px;">Edit</button>'
       + '<button type="button" class="link" data-del-acct="' + a.id + '" style="color:var(--coral-ink);">Hapus</button></div>';
   }).join('');
+  el.querySelectorAll('[data-edit-acct]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var acct = Catetin.state.accounts.find(function (a) { return a.id === btn.dataset.editAcct; });
+      if (!acct) return;
+      var result = await Catetin.modal.editAccount(acct);
+      if (!result) return;
+      var { error } = await Catetin.supabase.from('payment_sources').update(result).eq('id', acct.id);
+      if (error) { Catetin.toast(error.message.indexOf('duplicate') !== -1 ? 'Nama akun sudah ada' : 'Gagal mengubah akun'); return; }
+      await Catetin.reloadAll();
+      Catetin.renderManageAccounts();
+      Catetin.toast('Akun diperbarui');
+    });
+  });
   el.querySelectorAll('[data-del-acct]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
       var ok = await Catetin.modal.confirm({ title: 'Hapus akun ini?', message: 'Transaksi lama tetap tersimpan.', danger: true, confirmLabel: 'Hapus' });

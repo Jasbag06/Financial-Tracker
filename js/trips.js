@@ -94,6 +94,18 @@ Catetin.renderTripDetail = function () {
   Catetin.renderTxnGroups('trip-detail-txn-list', txns, Catetin.renderTripDetail);
 };
 
+document.getElementById('btn-trip-edit').addEventListener('click', async function () {
+  var trip = Catetin.state.trips.find(function (t) { return t.id === Catetin.currentTripId; });
+  if (!trip) return;
+  var result = await Catetin.modal.editTrip(trip);
+  if (!result) return;
+  var { error } = await Catetin.supabase.from('trips').update(result).eq('id', trip.id);
+  if (error) { Catetin.toast('Gagal mengubah acara'); return; }
+  await Catetin.reloadAll();
+  Catetin.renderTripDetail();
+  Catetin.toast('Acara diperbarui');
+});
+
 document.getElementById('btn-trip-delete').addEventListener('click', async function () {
   var trip = Catetin.state.trips.find(function (t) { return t.id === Catetin.currentTripId; });
   if (!trip) return;
