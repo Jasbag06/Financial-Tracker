@@ -15,7 +15,7 @@ Catetin.router.onEnter.history = function () {
 Catetin.renderHistoryFilters = function () {
   var cats = Catetin.state.categories;
   var catWrap = document.getElementById('history-cat-filter');
-  catWrap.innerHTML = '<button type="button" class="chip active" data-cat="" style="flex:none;">Semua Kategori</button>'
+  catWrap.innerHTML = '<button type="button" class="chip active" data-cat="" style="flex:none;">All Categories</button>'
     + cats.map(function (c) { return '<button type="button" class="chip" data-cat="' + Catetin.escapeHtml(c.name) + '" style="flex:none;">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</button>'; }).join('');
   catWrap.querySelectorAll('.chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
@@ -28,8 +28,8 @@ Catetin.renderHistoryFilters = function () {
 
   var tripWrap = document.getElementById('history-trip-filter');
   var trips = Catetin.state.trips;
-  tripWrap.innerHTML = '<button type="button" class="chip active" data-trip="" style="flex:none;">Semua</button>'
-    + '<button type="button" class="chip" data-trip="general" style="flex:none;">Umum</button>'
+  tripWrap.innerHTML = '<button type="button" class="chip active" data-trip="" style="flex:none;">All</button>'
+    + '<button type="button" class="chip" data-trip="general" style="flex:none;">General</button>'
     + trips.map(function (tr) { return '<button type="button" class="chip" data-trip="' + tr.id + '" style="flex:none;">' + tr.icon + ' ' + Catetin.escapeHtml(tr.name) + '</button>'; }).join('');
   tripWrap.querySelectorAll('.chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
@@ -84,11 +84,11 @@ Catetin.renderHistory = function () {
   Catetin.renderTxnGroups('history-list', list, Catetin.renderHistory);
 };
 
-// Shared by Riwayat and Acara (trip) detail — groups a transaction list by date
+// Shared by History and Event detail — groups a transaction list by date
 // with tap-to-reveal edit/delete, then re-runs `onChange` after any mutation.
 Catetin.renderTxnGroups = function (containerId, list, onChange) {
   var container = document.getElementById(containerId);
-  if (list.length === 0) { container.innerHTML = '<div class="empty-state">Tidak ada transaksi</div>'; return; }
+  if (list.length === 0) { container.innerHTML = '<div class="empty-state">No transactions</div>'; return; }
 
   var groups = {};
   var order = [];
@@ -107,7 +107,7 @@ Catetin.renderTxnGroups = function (containerId, list, onChange) {
       var sign = t.type === 'income' ? '+' : '-';
       var color = t.type === 'income' ? 'var(--mint-ink)' : 'var(--coral-ink)';
       var trip = t.trip_id ? Catetin.state.trips.find(function (tr) { return tr.id === t.trip_id; }) : null;
-      html += '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Hapus</button></div>'
+      html += '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Delete</button></div>'
         + '<div class="txn" data-swipe-toggle><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
         + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + (trip ? ' · ' + trip.icon + ' ' + Catetin.escapeHtml(trip.name) : '') + '</div><div class="sub">' + Catetin.escapeHtml(t.payment_source) + (t.note ? ' · ' + Catetin.escapeHtml(t.note) : '') + '</div></div>'
         + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div></div>'
@@ -123,13 +123,13 @@ Catetin.renderTxnGroups = function (containerId, list, onChange) {
   container.querySelectorAll('[data-del]').forEach(function (btn) {
     btn.addEventListener('click', async function (e) {
       e.stopPropagation();
-      var ok = await Catetin.modal.confirm({ title: 'Hapus transaksi ini?', danger: true, confirmLabel: 'Hapus' });
+      var ok = await Catetin.modal.confirm({ title: 'Delete this transaction?', danger: true, confirmLabel: 'Delete' });
       if (!ok) return;
       var { error } = await Catetin.supabase.from('transactions').delete().eq('id', btn.dataset.del);
-      if (error) { Catetin.toast('Gagal menghapus'); return; }
+      if (error) { Catetin.toast('Failed to delete'); return; }
       await Catetin.reloadAll();
       onChange();
-      Catetin.toast('Transaksi dihapus');
+      Catetin.toast('Transaction deleted');
     });
   });
   container.querySelectorAll('[data-edit]').forEach(function (btn) {
@@ -143,8 +143,8 @@ Catetin.editTransaction = async function (id, onChange) {
   var result = await Catetin.modal.editTransaction(t);
   if (!result) return;
   var { error } = await Catetin.supabase.from('transactions').update(result).eq('id', id);
-  if (error) { Catetin.toast('Gagal mengubah'); return; }
+  if (error) { Catetin.toast('Failed to update'); return; }
   await Catetin.reloadAll();
   onChange();
-  Catetin.toast('Transaksi diperbarui');
+  Catetin.toast('Transaction updated');
 };

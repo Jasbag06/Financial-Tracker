@@ -17,14 +17,14 @@ Catetin.tripCardHtml = function (trip) {
 Catetin.renderTripCardsOnDashboard = function () {
   var trips = Catetin.upcomingTrips();
   var html = trips.map(Catetin.tripCardHtml).join('')
-    + '<div class="add-acct-card" data-nav="add-trip"><div class="plus-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Acara Baru</span></div>';
+    + '<div class="add-acct-card" data-nav="add-trip"><div class="plus-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>New Event</span></div>';
   document.getElementById('trip-scroll').innerHTML = html;
 };
 
 Catetin.router.onEnter.trips = function () {
   var trips = Catetin.state.trips;
   var el = document.getElementById('trips-list');
-  if (trips.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada acara. Buat satu buat trip atau event yang mau kamu track terpisah.</div>'; return; }
+  if (trips.length === 0) { el.innerHTML = '<div class="empty-state">No events yet. Create one for a trip or occasion you want to track separately.</div>'; return; }
   el.innerHTML = '<div class="setting-card">' + trips.map(function (trip) {
     return '<button type="button" class="setting-row" data-nav="trip-detail" data-trip-id="' + trip.id + '">'
       + '<div class="icon-chip" style="background:var(--surface-2);">' + trip.icon + '</div>'
@@ -49,9 +49,9 @@ document.getElementById('add-trip-form').addEventListener('submit', async functi
   var { error } = await Catetin.supabase.from('trips').insert({
     user_id: Catetin.state.user.id, name: name, icon: icon, start_date: start, end_date: end
   });
-  if (error) { Catetin.toast('Gagal membuat acara'); return; }
+  if (error) { Catetin.toast('Failed to create event'); return; }
   await Catetin.reloadAll();
-  Catetin.toast('Acara dibuat');
+  Catetin.toast('Event created');
   Catetin.router.go('trips');
 });
 
@@ -73,7 +73,7 @@ Catetin.renderTripDetail = function () {
   expenseTxns.forEach(function (t) { byAccount[t.payment_source] = (byAccount[t.payment_source] || 0) + Number(t.amount); });
   var acctEl = document.getElementById('trip-detail-by-account');
   var acctKeys = Object.keys(byAccount);
-  acctEl.innerHTML = acctKeys.length === 0 ? '<div class="empty-state" style="padding:16px;">Belum ada pengeluaran</div>' : acctKeys.map(function (name, i) {
+  acctEl.innerHTML = acctKeys.length === 0 ? '<div class="empty-state" style="padding:16px;">No expenses yet</div>' : acctKeys.map(function (name, i) {
     var acct = Catetin.state.accounts.find(function (a) { return a.name === name; });
     return '<div class="txn"><div class="icon-chip" style="background:var(--surface-2);">' + (acct ? acct.name.slice(0, 2).toUpperCase() : '💳') + '</div>'
       + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(name) + '</div></div>'
@@ -84,7 +84,7 @@ Catetin.renderTripDetail = function () {
   expenseTxns.forEach(function (t) { byCategory[t.category] = (byCategory[t.category] || 0) + Number(t.amount); });
   var catEl = document.getElementById('trip-detail-by-category');
   var catKeys = Object.keys(byCategory).sort(function (a, b) { return byCategory[b] - byCategory[a]; });
-  catEl.innerHTML = catKeys.length === 0 ? '<div class="empty-state" style="padding:16px;">Belum ada pengeluaran</div>' : catKeys.map(function (name, i) {
+  catEl.innerHTML = catKeys.length === 0 ? '<div class="empty-state" style="padding:16px;">No expenses yet</div>' : catKeys.map(function (name, i) {
     var cat = Catetin.state.categories.find(function (c) { return c.name === name; });
     return '<div class="txn"><div class="icon-chip" style="background:var(--surface-2);">' + (cat ? cat.icon : '💸') + '</div>'
       + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(name) + '</div></div>'
@@ -100,20 +100,20 @@ document.getElementById('btn-trip-edit').addEventListener('click', async functio
   var result = await Catetin.modal.editTrip(trip);
   if (!result) return;
   var { error } = await Catetin.supabase.from('trips').update(result).eq('id', trip.id);
-  if (error) { Catetin.toast('Gagal mengubah acara'); return; }
+  if (error) { Catetin.toast('Failed to update event'); return; }
   await Catetin.reloadAll();
   Catetin.renderTripDetail();
-  Catetin.toast('Acara diperbarui');
+  Catetin.toast('Event updated');
 });
 
 document.getElementById('btn-trip-delete').addEventListener('click', async function () {
   var trip = Catetin.state.trips.find(function (t) { return t.id === Catetin.currentTripId; });
   if (!trip) return;
-  var ok = await Catetin.modal.confirm({ title: 'Hapus acara "' + trip.name + '"?', message: 'Transaksinya tetap tersimpan, cuma jadi transaksi Umum lagi.', danger: true, confirmLabel: 'Hapus' });
+  var ok = await Catetin.modal.confirm({ title: 'Delete event "' + trip.name + '"?', message: 'Its transactions stay saved, just tagged as General again.', danger: true, confirmLabel: 'Delete' });
   if (!ok) return;
   var { error } = await Catetin.supabase.from('trips').delete().eq('id', trip.id);
-  if (error) { Catetin.toast('Gagal menghapus acara'); return; }
+  if (error) { Catetin.toast('Failed to delete event'); return; }
   await Catetin.reloadAll();
-  Catetin.toast('Acara dihapus');
+  Catetin.toast('Event deleted');
   Catetin.router.go('trips');
 });

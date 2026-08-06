@@ -26,7 +26,12 @@ Catetin.router.go = function (name, opts) {
   if (!opts.silent) location.hash = name;
 
   var viewEl = document.getElementById('view-' + name);
-  if (viewEl) viewEl.scrollTop = 0;
+  if (viewEl) {
+    viewEl.scrollTop = 0;
+    viewEl.classList.remove('view-enter');
+    void viewEl.offsetWidth; // force reflow so the enter animation restarts every navigation
+    viewEl.classList.add('view-enter');
+  }
 
   if (Catetin.router.onEnter[name]) Catetin.router.onEnter[name]();
 };

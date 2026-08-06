@@ -7,8 +7,8 @@ Catetin.router.onEnter.dashboard = function () { Catetin.renderDashboard(); };
 Catetin.renderDashboard = function () {
   var hour = new Date().getHours();
   document.getElementById('greeting-time').textContent =
-    hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
-  document.getElementById('greeting-name').textContent = (Catetin.state.user.email || 'Kamu').split('@')[0] + ' 👋';
+    hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting-name').textContent = (Catetin.state.user.email || 'You').split('@')[0] + ' 👋';
 
   var accounts = Catetin.state.accounts;
   var total = Catetin.computeTotalBalance();
@@ -18,11 +18,11 @@ Catetin.renderDashboard = function () {
   var incomePct = (income + expense) > 0 ? Math.round(income / (income + expense) * 100) : 50;
 
   var html = '<div class="acct-card total"><div class="acct-top">'
-    + '<div><div class="acct-name" style="font-size:11.5px;opacity:.7;font-weight:600;">Semua Akun</div><div class="acct-sub" style="opacity:.8;">' + accounts.length + ' akun</div></div>'
+    + '<div><div class="acct-name" style="font-size:11.5px;opacity:.7;font-weight:600;">All Accounts</div><div class="acct-sub" style="opacity:.8;">' + accounts.length + ' accounts</div></div>'
     + '<button class="eye-toggle" id="btn-eye-toggle" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>'
     + '<div class="acct-balance mono"><span class="real">' + Catetin.fmtRp(total) + '</span><span class="masked">Rp •• •••</span></div>'
     + '<div class="split-bar" style="margin-top:12px;"><div style="width:' + incomePct + '%;background:var(--mint);"></div><div style="width:' + (100 - incomePct) + '%;background:var(--coral);"></div></div>'
-    + '<div class="split-legend"><span style="color:var(--mint);">● Masuk ' + Catetin.fmtShort(income) + '</span><span style="color:var(--coral);">● Keluar ' + Catetin.fmtShort(expense) + '</span></div></div>';
+    + '<div class="split-legend"><span style="color:var(--mint);">● In ' + Catetin.fmtShort(income) + '</span><span style="color:var(--coral);">● Out ' + Catetin.fmtShort(expense) + '</span></div></div>';
 
   accounts.forEach(function (a) {
     var bal = Catetin.computeBalance(a);
@@ -33,7 +33,7 @@ Catetin.renderDashboard = function () {
       + '<div class="acct-balance mono"><span class="real">' + Catetin.fmtRp(bal) + '</span><span class="masked">Rp •• •••</span></div></div>';
   });
 
-  html += '<div class="add-acct-card" data-nav="add-account"><div class="plus-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Tambah Bank</span></div>';
+  html += '<div class="add-acct-card" data-nav="add-account"><div class="plus-circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Add Bank</span></div>';
 
   document.getElementById('acct-scroll').innerHTML = html;
   document.getElementById('btn-eye-toggle').addEventListener('click', function () {
@@ -55,7 +55,7 @@ Catetin.renderDonut = function (expenseTx) {
 
   if (total === 0) {
     svg.innerHTML = '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--surface-2)" stroke-width="4"/>';
-    legend.innerHTML = '<div class="muted" style="font-size:12.5px;">Belum ada pengeluaran bulan ini</div>';
+    legend.innerHTML = '<div class="muted" style="font-size:12.5px;">No expenses this month yet</div>';
     return;
   }
 
@@ -78,14 +78,14 @@ Catetin.renderDonut = function (expenseTx) {
 Catetin.renderRecentTxns = function () {
   var recent = Catetin.state.transactions.slice(0, 5);
   var el = document.getElementById('recent-txn-list');
-  if (recent.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada transaksi</div>'; return; }
+  if (recent.length === 0) { el.innerHTML = '<div class="empty-state">No transactions yet</div>'; return; }
   el.innerHTML = recent.map(function (t, i) {
     var cat = Catetin.state.categories.find(function (c) { return c.name === t.category; });
     var icon = cat ? cat.icon : '💸';
     var sign = t.type === 'income' ? '+' : '-';
     var color = t.type === 'income' ? 'var(--mint-ink)' : 'var(--coral-ink)';
     return '<div class="txn"><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
-      + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + '</div><div class="sub">' + Catetin.escapeHtml(t.payment_source) + ' · ' + Catetin.fmtDateLabel(t.occurred_at) + '</div></div>'
+      + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + '</div><div class="sub">' + Catetin.escapeHtml(t.payment_source) + ' · ' + Catetin.fmtDateShort(t.occurred_at) + '</div></div>'
       + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div>'
       + (i < recent.length - 1 ? '<hr class="divider"/>' : '');
   }).join('');

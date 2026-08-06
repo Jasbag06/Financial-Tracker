@@ -34,11 +34,11 @@ Catetin.modal.confirm = function (opts) {
   opts = opts || {};
   return new Promise(function (resolve) {
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">' + Catetin.escapeHtml(opts.title || 'Yakin?') + '</p>'
+      '<p class="modal-title">' + Catetin.escapeHtml(opts.title || 'Are you sure?') + '</p>'
       + (opts.message ? '<p class="modal-msg">' + Catetin.escapeHtml(opts.message) + '</p>' : '')
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta' + (opts.danger ? '' : ' mint') + '" id="modal-ok"' + (opts.danger ? ' style="background:var(--coral);color:#fff;"' : '') + '>' + Catetin.escapeHtml(opts.confirmLabel || 'Ya') + '</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta' + (opts.danger ? '' : ' mint') + '" id="modal-ok"' + (opts.danger ? ' style="background:var(--coral);color:#fff;"' : '') + '>' + Catetin.escapeHtml(opts.confirmLabel || 'Yes') + '</button>'
       + '</div>',
       function () { resolve(false); }
     );
@@ -54,8 +54,8 @@ Catetin.modal.prompt = function (opts) {
       '<p class="modal-title">' + Catetin.escapeHtml(opts.title || '') + '</p>'
       + '<input type="' + (opts.type || 'text') + '" id="modal-input" class="modal-input" placeholder="' + Catetin.escapeHtml(opts.placeholder || '') + '" value="' + Catetin.escapeHtml(opts.initialValue || '') + '">'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">' + Catetin.escapeHtml(opts.confirmLabel || 'Simpan') + '</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">' + Catetin.escapeHtml(opts.confirmLabel || 'Save') + '</button>'
       + '</div>',
       function () { resolve(null); }
     );
@@ -74,14 +74,14 @@ Catetin.modal.addCategory = function () {
   return new Promise(function (resolve) {
     var selected = Catetin.ICON_CHOICES[0];
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">Kategori Baru</p>'
-      + '<input type="text" id="modal-cat-name" class="modal-input" placeholder="cth. Peliharaan">'
+      '<p class="modal-title">New Category</p>'
+      + '<input type="text" id="modal-cat-name" class="modal-input" placeholder="e.g. Pets">'
       + '<div class="icon-picker" id="modal-icon-picker">'
       + Catetin.ICON_CHOICES.map(function (ic, i) { return '<button type="button" data-icon="' + ic + '" class="' + (i === 0 ? 'active' : '') + '">' + ic + '</button>'; }).join('')
       + '</div>'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">Tambah</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Add</button>'
       + '</div>',
       function () { resolve(null); }
     );
@@ -108,15 +108,15 @@ Catetin.modal.editCategory = function (cat) {
   return new Promise(function (resolve) {
     var selected = cat.icon;
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">Ubah Kategori</p>'
-      + '<input type="text" id="modal-cat-name" class="modal-input" value="' + Catetin.escapeHtml(cat.name) + '" placeholder="Nama kategori">'
+      '<p class="modal-title">Edit Category</p>'
+      + '<input type="text" id="modal-cat-name" class="modal-input" value="' + Catetin.escapeHtml(cat.name) + '" placeholder="Category name">'
       + '<div class="icon-picker" id="modal-icon-picker">'
       + Catetin.ICON_CHOICES.map(function (ic) { return '<button type="button" data-icon="' + ic + '" class="' + (ic === selected ? 'active' : '') + '">' + ic + '</button>'; }).join('')
       + '</div>'
-      + '<input type="number" id="modal-cat-budget" class="modal-input" placeholder="Budget bulanan (opsional)" value="' + (cat.budget_monthly || '') + '" min="0" step="1000">'
+      + '<input type="number" id="modal-cat-budget" class="modal-input" placeholder="Monthly budget (optional)" value="' + (cat.budget_monthly || '') + '" min="0" step="1000">'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">Simpan</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
       + '</div>',
       function () { resolve(null); }
     );
@@ -144,22 +144,22 @@ Catetin.modal.editAccount = function (acct) {
   return new Promise(function (resolve) {
     var kind = acct.kind;
     var color = acct.color;
-    var kinds = [['bank', '🏦 Bank'], ['ewallet', '📱 E-wallet'], ['cash', '💵 Tunai'], ['credit_card', '💳 Kartu Kredit']];
+    var kinds = [['bank', '🏦 Bank'], ['ewallet', '📱 E-wallet'], ['cash', '💵 Cash'], ['credit_card', '💳 Credit Card']];
     var colors = ['lavender', 'mint', 'yellow', 'pink', 'coral'];
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">Ubah Akun</p>'
-      + '<input type="text" id="modal-acct-name" class="modal-input" value="' + Catetin.escapeHtml(acct.name) + '" placeholder="Nama bank/dompet">'
+      '<p class="modal-title">Edit Account</p>'
+      + '<input type="text" id="modal-acct-name" class="modal-input" value="' + Catetin.escapeHtml(acct.name) + '" placeholder="Bank/wallet name">'
       + '<div class="chip-row" id="modal-acct-kind" style="margin-bottom:16px;">'
       + kinds.map(function (k) { return '<button type="button" class="chip' + (k[0] === kind ? ' active' : '') + '" data-kind="' + k[0] + '">' + k[1] + '</button>'; }).join('')
       + '</div>'
-      + '<input type="text" id="modal-acct-number" class="modal-input" value="' + Catetin.escapeHtml(acct.account_number || '') + '" placeholder="No. Rekening/Kartu (opsional)">'
-      + '<input type="number" id="modal-acct-balance" class="modal-input" value="' + Number(acct.initial_balance) + '" placeholder="Saldo awal">'
+      + '<input type="text" id="modal-acct-number" class="modal-input" value="' + Catetin.escapeHtml(acct.account_number || '') + '" placeholder="Account/card number (optional)">'
+      + '<input type="number" id="modal-acct-balance" class="modal-input" value="' + Number(acct.initial_balance) + '" placeholder="Starting balance">'
       + '<div class="color-pick" id="modal-acct-color" style="margin-bottom:16px;">'
       + colors.map(function (c) { return '<button type="button" class="swatch' + (c === color ? ' active' : '') + '" data-color="' + c + '" style="background:var(--' + c + ');"></button>'; }).join('')
       + '</div>'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">Simpan</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
       + '</div>',
       function () { resolve(null); }
     );
@@ -195,8 +195,8 @@ Catetin.modal.editTrip = function (trip) {
   return new Promise(function (resolve) {
     var selected = trip.icon;
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">Ubah Acara</p>'
-      + '<input type="text" id="modal-trip-name" class="modal-input" value="' + Catetin.escapeHtml(trip.name) + '" placeholder="Nama acara">'
+      '<p class="modal-title">Edit Event</p>'
+      + '<input type="text" id="modal-trip-name" class="modal-input" value="' + Catetin.escapeHtml(trip.name) + '" placeholder="Event name">'
       + '<div class="icon-picker" id="modal-icon-picker">'
       + Catetin.ICON_CHOICES.map(function (ic) { return '<button type="button" data-icon="' + ic + '" class="' + (ic === selected ? 'active' : '') + '">' + ic + '</button>'; }).join('')
       + '</div>'
@@ -205,8 +205,8 @@ Catetin.modal.editTrip = function (trip) {
       + '<input type="date" id="modal-trip-end" class="modal-input" value="' + (trip.end_date || '') + '" style="flex:1;">'
       + '</div>'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">Simpan</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
       + '</div>',
       function () { resolve(null); }
     );
@@ -239,23 +239,23 @@ Catetin.modal.editTransaction = function (t) {
         .map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '"' + (c.name === t.category ? ' selected' : '') + '>' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('');
     }
     var acctOptions = Catetin.state.accounts.map(function (a) { return '<option value="' + Catetin.escapeHtml(a.name) + '"' + (a.name === t.payment_source ? ' selected' : '') + '>' + Catetin.escapeHtml(a.name) + '</option>'; }).join('');
-    var tripOptions = '<option value="">Umum</option>' + Catetin.state.trips.map(function (tr) { return '<option value="' + tr.id + '"' + (tr.id === t.trip_id ? ' selected' : '') + '>' + tr.icon + ' ' + Catetin.escapeHtml(tr.name) + '</option>'; }).join('');
+    var tripOptions = '<option value="">General</option>' + Catetin.state.trips.map(function (tr) { return '<option value="' + tr.id + '"' + (tr.id === t.trip_id ? ' selected' : '') + '>' + tr.icon + ' ' + Catetin.escapeHtml(tr.name) + '</option>'; }).join('');
 
     var sheet = Catetin.modal._show(
-      '<p class="modal-title">Ubah Transaksi</p>'
+      '<p class="modal-title">Edit Transaction</p>'
       + '<div class="toggle" id="modal-txn-type" style="margin-bottom:14px;">'
-      + '<button type="button" class="opt' + (t.type === 'expense' ? ' active' : '') + '" data-type="expense" style="' + (t.type === 'expense' ? 'color:var(--coral-ink);' : '') + '">Pengeluaran</button>'
-      + '<button type="button" class="opt' + (t.type === 'income' ? ' active' : '') + '" data-type="income" style="' + (t.type === 'income' ? 'color:var(--mint-ink);' : '') + '">Pemasukan</button>'
+      + '<button type="button" class="opt' + (t.type === 'expense' ? ' active' : '') + '" data-type="expense" style="' + (t.type === 'expense' ? 'color:var(--coral-ink);' : '') + '">Expense</button>'
+      + '<button type="button" class="opt' + (t.type === 'income' ? ' active' : '') + '" data-type="income" style="' + (t.type === 'income' ? 'color:var(--mint-ink);' : '') + '">Income</button>'
       + '</div>'
-      + '<input type="number" id="modal-amt" class="modal-input" value="' + Number(t.amount) + '" placeholder="Jumlah">'
+      + '<input type="number" id="modal-amt" class="modal-input" value="' + Number(t.amount) + '" placeholder="Amount">'
       + '<select id="modal-cat" class="modal-input">' + categoryOptions(t.type) + '</select>'
       + '<select id="modal-acct" class="modal-input">' + acctOptions + '</select>'
       + '<input type="date" id="modal-date" class="modal-input" value="' + t.occurred_at + '">'
       + '<select id="modal-trip" class="modal-input">' + tripOptions + '</select>'
-      + '<input type="text" id="modal-note" class="modal-input" value="' + Catetin.escapeHtml(t.note || '') + '" placeholder="Catatan (opsional)">'
+      + '<input type="text" id="modal-note" class="modal-input" value="' + Catetin.escapeHtml(t.note || '') + '" placeholder="Note (optional)">'
       + '<div class="modal-actions">'
-      + '<button type="button" class="cta ghost" id="modal-cancel">Batal</button>'
-      + '<button type="button" class="cta" id="modal-ok">Simpan</button>'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
       + '</div>',
       function () { resolve(null); }
     );

@@ -3,7 +3,7 @@ window.Catetin = window.Catetin || {};
 Catetin.scan = { ocrText: '', confidence: 0, items: [] };
 
 Catetin.router.onEnter.scan = function () {
-  document.getElementById('scan-caption').textContent = 'Arahkan kamera ke struk';
+  document.getElementById('scan-caption').textContent = 'Point camera at receipt';
 };
 
 function catetinTriggerInput(id) { document.getElementById(id).click(); }
@@ -26,19 +26,19 @@ document.getElementById('btn-scan-from-dashboard').addEventListener('click', fun
 Catetin.scan.process = async function (file) {
   var progressEl = document.getElementById('scan-progress');
   progressEl.hidden = false;
-  progressEl.textContent = 'Membaca struk... 0%';
+  progressEl.textContent = 'Reading receipt... 0%';
   try {
     var result = await Tesseract.recognize(file, 'eng', {
       logger: function (m) {
         if (m.status === 'recognizing text') {
-          progressEl.textContent = 'Membaca struk... ' + Math.round(m.progress * 100) + '%';
+          progressEl.textContent = 'Reading receipt... ' + Math.round(m.progress * 100) + '%';
         }
       }
     });
     Catetin.scan.ocrText = result.data.text || '';
     Catetin.scan.confidence = result.data.confidence || 0;
   } catch (err) {
-    Catetin.toast('Gagal membaca struk, isi manual ya');
+    Catetin.toast('Failed to read receipt, please fill in manually');
     Catetin.scan.ocrText = '';
     Catetin.scan.confidence = 0;
   }
@@ -87,7 +87,7 @@ Catetin.scan.openResult = function () {
   var parsed = Catetin.scan.parse(Catetin.scan.ocrText);
   document.getElementById('scan-merchant').value = parsed.merchant;
   document.getElementById('scan-date').value = parsed.date;
-  document.getElementById('scan-accuracy').textContent = Catetin.scan.confidence ? ('~' + Math.round(Catetin.scan.confidence) + '% akurat') : 'Isi manual';
+  document.getElementById('scan-accuracy').textContent = Catetin.scan.confidence ? ('~' + Math.round(Catetin.scan.confidence) + '% accurate') : 'Fill manually';
 
   var accSel = document.getElementById('scan-account');
   accSel.innerHTML = Catetin.state.accounts.map(function (a) { return '<option value="' + Catetin.escapeHtml(a.name) + '">' + Catetin.escapeHtml(a.name) + '</option>'; }).join('');
@@ -95,15 +95,15 @@ Catetin.scan.openResult = function () {
   var catSel = document.getElementById('scan-category');
   var expenseCats = Catetin.state.categories.filter(function (c) { return c.type === 'expense'; });
   catSel.innerHTML = expenseCats.map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('');
-  var belanja = expenseCats.find(function (c) { return /belanja/i.test(c.name); });
-  if (belanja) catSel.value = belanja.name;
+  var shopping = expenseCats.find(function (c) { return /shopping|belanja/i.test(c.name); });
+  if (shopping) catSel.value = shopping.name;
 
   var tripSel = document.getElementById('scan-trip');
-  tripSel.innerHTML = '<option value="">Umum</option>' + Catetin.upcomingTrips().map(function (tr) {
+  tripSel.innerHTML = '<option value="">General</option>' + Catetin.upcomingTrips().map(function (tr) {
     return '<option value="' + tr.id + '">' + tr.icon + ' ' + Catetin.escapeHtml(tr.name) + '</option>';
   }).join('');
 
-  Catetin.scan.items = parsed.items.length ? parsed.items : [{ name: 'Total Belanja', amount: parsed.total }];
+  Catetin.scan.items = parsed.items.length ? parsed.items : [{ name: 'Total Purchase', amount: parsed.total }];
   Catetin.scan.renderItems();
   Catetin.router.go('scan-result');
 };
@@ -147,8 +147,8 @@ document.getElementById('btn-scan-add-item').addEventListener('click', function 
 
 document.getElementById('btn-scan-save').addEventListener('click', async function () {
   var total = Catetin.scan.items.reduce(function (s, i) { return s + (Number(i.amount) || 0); }, 0);
-  if (total <= 0) { Catetin.toast('Total belum valid'); return; }
-  if (!Catetin.state.accounts.length) { Catetin.toast('Tambah akun bank dulu di Pengaturan'); return; }
+  if (total <= 0) { Catetin.toast('Total is not valid'); return; }
+  if (!Catetin.state.accounts.length) { Catetin.toast('Add a bank account first in Settings'); return; }
   var merchant = document.getElementById('scan-merchant').value.trim();
   var btn = this; btn.disabled = true;
   var { error } = await Catetin.supabase.from('transactions').insert({
@@ -163,8 +163,8 @@ document.getElementById('btn-scan-save').addEventListener('click', async functio
     trip_id: document.getElementById('scan-trip').value || null
   });
   btn.disabled = false;
-  if (error) { Catetin.toast('Gagal menyimpan'); return; }
+  if (error) { Catetin.toast('Failed to save'); return; }
   await Catetin.reloadAll();
-  Catetin.toast('Tersimpan sebagai pengeluaran');
+  Catetin.toast('Saved as expense');
   Catetin.router.go('dashboard');
 });

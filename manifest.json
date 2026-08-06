@@ -1,7 +1,7 @@
 {
-  "name": "Catetin",
-  "short_name": "Catetin",
-  "description": "Pencatat pengeluaran & pemasukan harian",
+  "name": "Financial Tracker",
+  "short_name": "Fin Tracker",
+  "description": "Daily income & expense tracker",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

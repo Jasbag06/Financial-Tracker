@@ -40,14 +40,14 @@ Catetin.tripExpenseTotal = function (tripId) {
 
 Catetin.tripStatusLabel = function (trip) {
   var today = new Date().toISOString().slice(0, 10);
-  if (trip.start_date && trip.start_date > today) return 'Akan datang';
-  if (trip.end_date && trip.end_date < today) return 'Selesai';
-  return 'Berlangsung';
+  if (trip.start_date && trip.start_date > today) return 'Upcoming';
+  if (trip.end_date && trip.end_date < today) return 'Done';
+  return 'Ongoing';
 };
 
 Catetin.tripDateRangeLabel = function (trip) {
-  if (!trip.start_date && !trip.end_date) return 'Tanpa tanggal';
-  var fmt = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); };
+  if (!trip.start_date && !trip.end_date) return 'No date';
+  var fmt = function (d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); };
   if (trip.start_date && trip.end_date) return fmt(trip.start_date) + ' – ' + fmt(trip.end_date);
   return fmt(trip.start_date || trip.end_date);
 };

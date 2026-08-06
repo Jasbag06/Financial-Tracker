@@ -5,13 +5,13 @@ Catetin.router.onEnter['manage-accounts'] = function () { Catetin.renderManageAc
 Catetin.renderManageAccounts = function () {
   var el = document.getElementById('manage-acct-list');
   var accounts = Catetin.state.accounts;
-  if (accounts.length === 0) { el.innerHTML = '<div class="empty-state">Belum ada akun</div>'; return; }
+  if (accounts.length === 0) { el.innerHTML = '<div class="empty-state">No accounts yet</div>'; return; }
   el.innerHTML = accounts.map(function (a) {
     var bal = Catetin.computeBalance(a);
     return '<div class="setting-row" style="cursor:default;"><div class="icon-chip" style="background:var(--' + a.color + ');">' + a.name.slice(0, 2).toUpperCase() + '</div>'
       + '<div class="label">' + Catetin.escapeHtml(a.name) + '<div class="muted" style="font-size:11px;font-weight:400;">' + Catetin.fmtRp(bal) + '</div></div>'
       + '<button type="button" class="link" data-edit-acct="' + a.id + '" style="margin-right:12px;">Edit</button>'
-      + '<button type="button" class="link" data-del-acct="' + a.id + '" style="color:var(--coral-ink);">Hapus</button></div>';
+      + '<button type="button" class="link" data-del-acct="' + a.id + '" style="color:var(--coral-ink);">Delete</button></div>';
   }).join('');
   el.querySelectorAll('[data-edit-acct]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
@@ -20,18 +20,18 @@ Catetin.renderManageAccounts = function () {
       var result = await Catetin.modal.editAccount(acct);
       if (!result) return;
       var { error } = await Catetin.supabase.from('payment_sources').update(result).eq('id', acct.id);
-      if (error) { Catetin.toast(error.message.indexOf('duplicate') !== -1 ? 'Nama akun sudah ada' : 'Gagal mengubah akun'); return; }
+      if (error) { Catetin.toast(error.message.indexOf('duplicate') !== -1 ? 'An account with this name already exists' : 'Failed to update account'); return; }
       await Catetin.reloadAll();
       Catetin.renderManageAccounts();
-      Catetin.toast('Akun diperbarui');
+      Catetin.toast('Account updated');
     });
   });
   el.querySelectorAll('[data-del-acct]').forEach(function (btn) {
     btn.addEventListener('click', async function () {
-      var ok = await Catetin.modal.confirm({ title: 'Hapus akun ini?', message: 'Transaksi lama tetap tersimpan.', danger: true, confirmLabel: 'Hapus' });
+      var ok = await Catetin.modal.confirm({ title: 'Delete this account?', message: 'Past transactions stay saved.', danger: true, confirmLabel: 'Delete' });
       if (!ok) return;
       var { error } = await Catetin.supabase.from('payment_sources').delete().eq('id', btn.dataset.delAcct);
-      if (error) { Catetin.toast('Gagal menghapus'); return; }
+      if (error) { Catetin.toast('Failed to delete'); return; }
       await Catetin.reloadAll();
       Catetin.renderManageAccounts();
       Catetin.updateSettingsCounts();
@@ -61,12 +61,12 @@ document.getElementById('add-account-form').addEventListener('submit', async fun
     user_id: Catetin.state.user.id, name: name, kind: kind, account_number: number || null,
     initial_balance: balance, color: color, sort_order: Catetin.state.accounts.length + 1
   });
-  if (error) { Catetin.toast(error.message.indexOf('duplicate') !== -1 ? 'Nama akun sudah ada' : 'Gagal menambah akun'); return; }
+  if (error) { Catetin.toast(error.message.indexOf('duplicate') !== -1 ? 'An account with this name already exists' : 'Failed to add account'); return; }
   this.reset();
   document.querySelectorAll('#new-acct-kind .chip').forEach(function (c, i) { c.classList.toggle('active', i === 0); });
   document.querySelectorAll('#new-acct-color .swatch').forEach(function (c, i) { c.classList.toggle('active', i === 0); });
   await Catetin.reloadAll();
-  Catetin.toast('Akun ditambahkan');
+  Catetin.toast('Account added');
   Catetin.router.go('manage-accounts');
   Catetin.updateSettingsCounts();
 });

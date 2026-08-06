@@ -2,14 +2,14 @@ window.Catetin = window.Catetin || {};
 
 Catetin.fmtRp = function (n) {
   n = Math.round(Number(n) || 0);
-  return 'Rp ' + n.toLocaleString('id-ID');
+  return 'Rp ' + n.toLocaleString('en-US');
 };
 
 Catetin.fmtShort = function (n) {
   n = Number(n) || 0;
   var abs = Math.abs(n);
-  if (abs >= 1000000) return (n / 1000000).toFixed(abs % 1000000 === 0 ? 0 : 1).replace('.', ',') + 'jt';
-  if (abs >= 1000) return Math.round(n / 1000) + 'rb';
+  if (abs >= 1000000) return (n / 1000000).toFixed(abs % 1000000 === 0 ? 0 : 1) + 'M';
+  if (abs >= 1000) return Math.round(n / 1000) + 'K';
   return String(Math.round(n));
 };
 
@@ -18,9 +18,16 @@ Catetin.fmtDateLabel = function (dateStr) {
   var today = new Date(); today.setHours(0, 0, 0, 0);
   var yest = new Date(today); yest.setDate(yest.getDate() - 1);
   var dOnly = new Date(d); dOnly.setHours(0, 0, 0, 0);
-  if (dOnly.getTime() === today.getTime()) return 'Hari ini';
-  if (dOnly.getTime() === yest.getTime()) return 'Kemarin';
-  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (dOnly.getTime() === today.getTime()) return 'Today';
+  if (dOnly.getTime() === yest.getTime()) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+// Always a concrete date (never "Today"/"Yesterday") - used where a relative
+// label would leave a transaction looking like it has no real date.
+Catetin.fmtDateShort = function (dateStr) {
+  var d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 };
 
 Catetin.toast = function (msg) {
@@ -38,5 +45,5 @@ Catetin.escapeHtml = function (s) {
 };
 
 Catetin.kindLabel = function (kind) {
-  return { cash: 'Tunai', bank: 'Bank', ewallet: 'E-wallet', credit_card: 'Kartu Kredit', other: 'Lainnya' }[kind] || kind;
+  return { cash: 'Cash', bank: 'Bank', ewallet: 'E-wallet', credit_card: 'Credit Card', other: 'Other' }[kind] || kind;
 };

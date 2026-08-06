@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FAF3E6">
-<title>Catetin</title>
+<title>Financial Tracker</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Catetin">
+<meta name="apple-mobile-web-app-title" content="Financial Tracker">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -18,42 +18,42 @@
 
   <!-- ============ AUTH ============ -->
   <section id="view-auth" class="view auth-view">
-    <h1>Catetin</h1>
-    <p class="sub" id="auth-sub">Masuk untuk mulai mencatat pengeluaran harianmu.</p>
+    <h1>Financial Tracker</h1>
+    <p class="sub" id="auth-sub">Sign in to start tracking your daily expenses.</p>
     <form id="auth-form">
       <div class="field"><label for="auth-email">Email</label><input type="email" id="auth-email" autocomplete="email" required></div>
-      <div class="field"><label for="auth-password">Kata Sandi</label><input type="password" id="auth-password" autocomplete="current-password" required minlength="6"></div>
+      <div class="field"><label for="auth-password">Password</label><input type="password" id="auth-password" autocomplete="current-password" required minlength="6"></div>
       <div class="auth-error" id="auth-error"></div>
-      <button type="submit" class="cta" id="auth-submit">Masuk</button>
+      <button type="submit" class="cta" id="auth-submit">Sign In</button>
     </form>
-    <button type="button" class="link" id="auth-toggle-mode" style="margin-top:16px;text-align:center;width:100%;">Belum punya akun? Daftar</button>
+    <button type="button" class="link" id="auth-toggle-mode" style="margin-top:16px;text-align:center;width:100%;">Don't have an account? Sign Up</button>
   </section>
 
-  <!-- ============ BERANDA ============ -->
+  <!-- ============ HOME ============ -->
   <section id="view-dashboard" class="view" hidden>
     <div class="header-row">
-      <div><div class="muted" style="font-size:12.5px;" id="greeting-time">Selamat pagi</div><h1 id="greeting-name">Jason 👋</h1></div>
-      <button class="icon-btn" id="btn-scan-from-dashboard" title="Scan struk">
+      <div><div class="muted" style="font-size:12.5px;" id="greeting-time">Good morning</div><h1 id="greeting-name">Jason 👋</h1></div>
+      <button class="icon-btn" id="btn-scan-from-dashboard" title="Scan receipt">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
       </button>
     </div>
 
     <div class="acct-scroll" id="acct-scroll"></div>
 
-    <div class="section-title between"><span>Acara</span><button class="link" data-nav="trips">Lihat semua</button></div>
+    <div class="section-title between"><span>Events</span><button class="link" data-nav="trips">View all</button></div>
     <div class="acct-scroll" id="trip-scroll" style="margin-bottom:4px;"></div>
 
-    <div class="section-title between"><span>Kemana Uangku</span><button class="link" data-nav="budget">Detail</button></div>
+    <div class="section-title between"><span>Financial Diary</span><button class="link" data-nav="budget">Details</button></div>
     <div class="card donut-wrap" id="donut-card">
       <svg width="88" height="88" viewBox="0 0 36 36" style="flex:none;" id="donut-svg"></svg>
       <div class="donut-legend" id="donut-legend"></div>
     </div>
 
-    <div class="section-title between"><span>Transaksi Terbaru</span><button class="link" data-nav="history">Lihat semua</button></div>
+    <div class="section-title between"><span>Recent Transactions</span><button class="link" data-nav="history">View all</button></div>
     <div class="card" style="padding:6px 16px;" id="recent-txn-list"></div>
   </section>
 
-  <!-- ============ CATAT ============ -->
+  <!-- ============ ADD ============ -->
   <section id="view-catat" class="view" hidden style="padding:0;display:flex;flex-direction:column;">
     <div style="padding:calc(env(safe-area-inset-top) + 18px) 18px 0;flex:none;"></div>
     <div class="catat-viewport" id="catat-viewport">
@@ -61,14 +61,14 @@
 
         <div class="catat-step" style="padding:6px 18px 24px;">
           <div class="header-row">
-            <button class="icon-btn" id="btn-catat-close" title="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-            <h1>Catat</h1>
-            <button class="icon-btn" id="btn-catat-scan" title="Scan struk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>
+            <button class="icon-btn" id="btn-catat-close" title="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+            <h1>Add</h1>
+            <button class="icon-btn" id="btn-catat-scan" title="Scan receipt"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>
           </div>
 
           <div class="toggle" id="type-toggle">
-            <button type="button" class="opt active" data-type="expense" style="color:var(--coral-ink);">Pengeluaran</button>
-            <button type="button" class="opt" data-type="income">Pemasukan</button>
+            <button type="button" class="opt active" data-type="expense" style="color:var(--coral-ink);">Expense</button>
+            <button type="button" class="opt" data-type="income">Income</button>
           </div>
 
           <div class="amount-display">
@@ -84,13 +84,13 @@
             <button type="button" class="key" data-key="000">000</button><button type="button" class="key" data-key="0">0</button>
             <button type="button" class="key" data-key="back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="m14 9-4 6M10 9l4 6"/></svg></button>
           </div>
-          <button type="button" class="cta" id="btn-catat-next" disabled>Lanjut <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></button>
+          <button type="button" class="cta" id="btn-catat-next" disabled>Next <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg></button>
         </div>
 
         <div class="catat-step" style="padding:6px 18px 24px;">
           <div class="header-row">
-            <button class="icon-btn" data-catat-back title="Kembali"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-            <h1>Pilih Kategori</h1>
+            <button class="icon-btn" data-catat-back title="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+            <h1>Choose Category</h1>
             <div style="width:36px;"></div>
           </div>
           <span class="reminder-pill" id="cat-reminder"></span>
@@ -99,60 +99,60 @@
 
         <div class="catat-step" style="padding:6px 18px 24px;">
           <div class="header-row">
-            <button class="icon-btn" data-catat-back title="Kembali"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-            <h1>Bayar Dari</h1>
+            <button class="icon-btn" data-catat-back title="Back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+            <h1>Pay From</h1>
             <div style="width:36px;"></div>
           </div>
           <span class="reminder-pill" id="pay-reminder"></span>
 
-          <div class="section-title" style="margin-top:16px;">Akun</div>
+          <div class="section-title" style="margin-top:16px;">Account</div>
           <div class="acct-chip-row" id="pay-acct-row"></div>
 
           <div class="field" style="margin-top:20px;">
-            <label>Acara (opsional)</label>
+            <label>Event (optional)</label>
             <div class="chip-row" id="txn-trip-row" style="flex-wrap:nowrap;overflow-x:auto;"></div>
           </div>
 
-          <div class="field"><label for="txn-note">Catatan (opsional)</label><input type="text" id="txn-note" placeholder="cth. Nasi Padang"></div>
+          <div class="field"><label for="txn-note">Note (optional)</label><input type="text" id="txn-note" placeholder="e.g. Lunch"></div>
 
           <div class="field">
-            <label>Ulangi Otomatis</label>
+            <label>Repeat Automatically</label>
             <div class="chip-row" id="recurring-row">
-              <button type="button" class="chip active" data-recurring="false">Tidak</button>
-              <button type="button" class="chip" data-recurring="true">Tiap Bulan</button>
+              <button type="button" class="chip active" data-recurring="false">No</button>
+              <button type="button" class="chip" data-recurring="true">Monthly</button>
             </div>
           </div>
 
           <button type="button" class="cta mint" style="margin-top:24px;" id="btn-save-txn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-            Simpan
+            Save
           </button>
         </div>
 
       </div>
     </div>
-    <div class="catat-toast" id="catat-toast">✓ Tersimpan</div>
+    <div class="catat-toast" id="catat-toast">✓ Saved</div>
   </section>
 
-  <!-- ============ RIWAYAT ============ -->
+  <!-- ============ HISTORY ============ -->
   <section id="view-history" class="view" hidden>
     <div class="header-row">
-      <div class="row" style="gap:8px;"><h1>Riwayat</h1></div>
+      <div class="row" style="gap:8px;"><h1>History</h1></div>
       <button class="icon-btn" id="btn-history-filter-toggle">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.6" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="10" cy="18" r="1.6" fill="currentColor" stroke="none"/></svg>
       </button>
     </div>
 
     <div class="toggle" id="history-type-toggle" style="margin-bottom:12px;">
-      <button type="button" class="opt active" data-type="">Semua</button>
-      <button type="button" class="opt" data-type="expense">Pengeluaran</button>
-      <button type="button" class="opt" data-type="income">Pemasukan</button>
+      <button type="button" class="opt active" data-type="">All</button>
+      <button type="button" class="opt" data-type="expense">Expense</button>
+      <button type="button" class="opt" data-type="income">Income</button>
     </div>
 
     <div id="history-filter-panel" hidden style="margin-bottom:16px;">
       <div class="row" style="gap:10px;margin-bottom:12px;">
-        <div class="field" style="flex:1;margin-bottom:0;"><label for="history-date-from">Dari</label><input type="date" id="history-date-from"></div>
-        <div class="field" style="flex:1;margin-bottom:0;"><label for="history-date-to">Sampai</label><input type="date" id="history-date-to"></div>
+        <div class="field" style="flex:1;margin-bottom:0;"><label for="history-date-from">From</label><input type="date" id="history-date-from"></div>
+        <div class="field" style="flex:1;margin-bottom:0;"><label for="history-date-to">To</label><input type="date" id="history-date-to"></div>
         <button type="button" class="link" id="btn-history-clear-dates" style="align-self:flex-end;padding:11px 0;">Reset</button>
       </div>
       <div class="chip-row" id="history-cat-filter" style="flex-wrap:nowrap;overflow-x:auto;margin:0 -18px 10px;padding:0 18px 2px;"></div>
@@ -162,86 +162,86 @@
     <div id="history-list"></div>
   </section>
 
-  <!-- ============ ANGGARAN ============ -->
+  <!-- ============ BUDGET ============ -->
   <section id="view-budget" class="view" hidden>
-    <div class="header-row"><h1>Anggaran</h1><span class="muted" style="font-size:12px;" id="budget-month-label"></span></div>
+    <div class="header-row"><h1>Budget</h1><span class="muted" style="font-size:12px;" id="budget-month-label"></span></div>
     <div id="budget-list"></div>
   </section>
 
-  <!-- ============ ACARA (list) ============ -->
+  <!-- ============ EVENTS (list) ============ -->
   <section id="view-trips" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="dashboard"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h1>Acara</h1>
+      <h1>Events</h1>
       <div style="width:36px;"></div>
     </div>
-    <p class="muted" style="font-size:13px;margin:-8px 0 18px;">Kelompokkan transaksi untuk trip atau acara tertentu, terpisah dari catatan harian biasa.</p>
+    <p class="muted" style="font-size:13px;margin:-8px 0 18px;">Group transactions for a specific trip or event, separate from your everyday records.</p>
     <div id="trips-list"></div>
     <button type="button" class="cta" data-nav="add-trip" style="margin-top:16px;">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-      Buat Acara Baru
+      Create New Event
     </button>
   </section>
 
-  <!-- ============ TAMBAH ACARA ============ -->
+  <!-- ============ ADD EVENT ============ -->
   <section id="view-add-trip" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="trips"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      <h1>Acara Baru</h1>
+      <h1>New Event</h1>
       <div style="width:36px;"></div>
     </div>
     <form id="add-trip-form">
-      <div class="field"><label for="new-trip-name">Nama Acara</label><input type="text" id="new-trip-name" placeholder="cth. Pergi ke Bandung" required></div>
-      <div class="field"><label for="new-trip-icon">Ikon (emoji)</label><input type="text" id="new-trip-icon" placeholder="🧳" maxlength="4" value="🧳"></div>
+      <div class="field"><label for="new-trip-name">Event Name</label><input type="text" id="new-trip-name" placeholder="e.g. Trip to Bandung" required></div>
+      <div class="field"><label for="new-trip-icon">Icon (emoji)</label><input type="text" id="new-trip-icon" placeholder="🧳" maxlength="4" value="🧳"></div>
       <div class="row" style="gap:12px;">
-        <div class="field" style="flex:1;"><label for="new-trip-start">Tanggal Mulai</label><input type="date" id="new-trip-start"></div>
-        <div class="field" style="flex:1;"><label for="new-trip-end">Tanggal Selesai (opsional)</label><input type="date" id="new-trip-end"></div>
+        <div class="field" style="flex:1;"><label for="new-trip-start">Start Date</label><input type="date" id="new-trip-start"></div>
+        <div class="field" style="flex:1;"><label for="new-trip-end">End Date (optional)</label><input type="date" id="new-trip-end"></div>
       </div>
-      <button type="submit" class="cta">Buat Acara</button>
+      <button type="submit" class="cta">Create Event</button>
     </form>
   </section>
 
-  <!-- ============ DETAIL ACARA ============ -->
+  <!-- ============ EVENT DETAIL ============ -->
   <section id="view-trip-detail" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="trips"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h1 id="trip-detail-name">Acara</h1>
+      <h1 id="trip-detail-name">Event</h1>
       <div class="row" style="gap:6px;">
-        <button class="icon-btn" id="btn-trip-edit" title="Ubah acara"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-        <button class="icon-btn" id="btn-trip-delete" title="Hapus acara"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--coral-ink)" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/></svg></button>
+        <button class="icon-btn" id="btn-trip-edit" title="Edit event"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+        <button class="icon-btn" id="btn-trip-delete" title="Delete event"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--coral-ink)" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/></svg></button>
       </div>
     </div>
     <p class="muted" style="font-size:12.5px;margin:-10px 0 16px;" id="trip-detail-dates"></p>
 
     <div class="card" style="text-align:center;padding:20px;">
-      <div class="muted" style="font-size:12px;">Total Pengeluaran</div>
+      <div class="muted" style="font-size:12px;">Total Spent</div>
       <div class="mono" style="font-size:28px;font-weight:700;margin-top:4px;" id="trip-detail-total">Rp 0</div>
     </div>
 
-    <div class="section-title">Bayar Pakai Apa</div>
+    <div class="section-title">Paid With</div>
     <div class="card" id="trip-detail-by-account" style="padding:6px 16px;"></div>
 
-    <div class="section-title">Kategori</div>
+    <div class="section-title">Category</div>
     <div class="card" id="trip-detail-by-category" style="padding:6px 16px;"></div>
 
-    <div class="section-title">Transaksi</div>
+    <div class="section-title">Transactions</div>
     <div id="trip-detail-txn-list"></div>
   </section>
 
-  <!-- ============ PENGATURAN ============ -->
+  <!-- ============ SETTINGS ============ -->
   <section id="view-settings" class="view" hidden>
-    <div class="header-row"><h1>Pengaturan</h1><div style="width:36px;"></div></div>
+    <div class="header-row"><h1>Settings</h1><div style="width:36px;"></div></div>
 
     <div class="row" style="gap:12px;margin-bottom:24px;">
       <div class="avatar-circle" id="settings-avatar">J</div>
-      <div><div style="font-weight:700;font-size:15px;" id="settings-email">—</div><div class="muted" style="font-size:12px;">Akun pribadi · Login via email</div></div>
+      <div><div style="font-weight:700;font-size:15px;" id="settings-email">—</div><div class="muted" style="font-size:12px;">Personal account · Signed in via email</div></div>
     </div>
 
-    <div class="section-title" style="margin-top:0;">Akun</div>
+    <div class="section-title" style="margin-top:0;">Account</div>
     <div class="setting-card">
       <button type="button" class="setting-row" id="btn-change-password">
         <div class="icon-chip" style="background:var(--surface-2);">🔑</div>
-        <div class="label">Ubah Kata Sandi</div>
+        <div class="label">Change Password</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
     </div>
@@ -250,121 +250,121 @@
     <div class="setting-card">
       <button type="button" class="setting-row" data-nav="manage-categories">
         <div class="icon-chip" style="background:#F6D9C9;">🏷️</div>
-        <div class="label">Kelola Kategori</div>
+        <div class="label">Manage Categories</div>
         <div class="value" id="category-count">—</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
       <button type="button" class="setting-row" data-nav="manage-accounts">
         <div class="icon-chip" style="background:#E1E2F5;">🏦</div>
-        <div class="label">Kelola Akun Bank</div>
+        <div class="label">Manage Bank Accounts</div>
         <div class="value" id="account-count">—</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
     </div>
 
-    <div class="section-title">Preferensi</div>
+    <div class="section-title">Preferences</div>
     <div class="setting-card">
       <div class="setting-row" style="cursor:default;">
         <div class="icon-chip" style="background:#FBEEDA;">🎨</div>
-        <div class="label">Tema</div>
+        <div class="label">Theme</div>
         <div class="chip-row" id="settings-theme-toggle">
-          <button type="button" class="chip" data-theme-btn="light" style="padding:6px 11px;font-size:11.5px;">☀️ Terang</button>
-          <button type="button" class="chip" data-theme-btn="dark" style="padding:6px 11px;font-size:11.5px;">🌙 Gelap</button>
+          <button type="button" class="chip" data-theme-btn="light" style="padding:6px 11px;font-size:11.5px;">☀️ Light</button>
+          <button type="button" class="chip" data-theme-btn="dark" style="padding:6px 11px;font-size:11.5px;">🌙 Dark</button>
         </div>
       </div>
       <div class="setting-row" style="cursor:default;">
         <div class="icon-chip" style="background:#D9EFE5;">🔔</div>
-        <div class="label">Notifikasi</div>
+        <div class="label">Notifications</div>
         <button type="button" class="switch" id="notif-switch"><div class="knob"></div></button>
       </div>
       <div class="setting-row" style="cursor:default;">
         <div class="icon-chip" style="background:var(--surface-2);">💱</div>
-        <div class="label">Mata Uang</div>
+        <div class="label">Currency</div>
         <div class="value">IDR (Rp)</div>
       </div>
     </div>
 
-    <div class="section-title">Tentang</div>
+    <div class="section-title">About</div>
     <div class="setting-card">
       <button type="button" class="setting-row" data-nav="install-guide">
         <div class="icon-chip" style="background:#D9EFE5;">📲</div>
-        <div class="label">Pasang ke Home Screen &amp; Back Tap</div>
+        <div class="label">Add to Home Screen &amp; Back Tap</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
       <div class="setting-row" style="cursor:default;">
         <div class="icon-chip" style="background:var(--surface-2);">ℹ️</div>
-        <div class="label">Versi Aplikasi</div>
+        <div class="label">App Version</div>
         <div class="value">1.0.0</div>
       </div>
     </div>
 
     <button type="button" class="cta outline" style="margin-top:24px;" id="btn-logout">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
-      Keluar
+      Log Out
     </button>
   </section>
 
-  <!-- ============ KELOLA KATEGORI ============ -->
+  <!-- ============ MANAGE CATEGORIES ============ -->
   <section id="view-manage-categories" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h1>Kelola Kategori</h1>
+      <h1>Manage Categories</h1>
       <div style="width:36px;"></div>
     </div>
     <div class="toggle" id="manage-cat-type-toggle" style="margin-bottom:16px;">
-      <button type="button" class="opt active" data-type="expense" style="color:var(--coral-ink);">Pengeluaran</button>
-      <button type="button" class="opt" data-type="income">Pemasukan</button>
+      <button type="button" class="opt active" data-type="expense" style="color:var(--coral-ink);">Expense</button>
+      <button type="button" class="opt" data-type="income">Income</button>
     </div>
     <div class="setting-card" id="manage-cat-list" style="margin-bottom:18px;"></div>
 
-    <div class="section-title">Tambah Kategori</div>
+    <div class="section-title">Add Category</div>
     <form id="add-category-form" class="card">
-      <div class="field"><label for="new-cat-name">Nama</label><input type="text" id="new-cat-name" placeholder="cth. Peliharaan" required></div>
+      <div class="field"><label for="new-cat-name">Name</label><input type="text" id="new-cat-name" placeholder="e.g. Pets" required></div>
       <div class="field">
-        <label>Ikon</label>
+        <label>Icon</label>
         <div class="icon-picker" id="new-cat-icon-picker"></div>
       </div>
-      <div class="field"><label for="new-cat-budget">Budget Bulanan (opsional)</label><input type="number" id="new-cat-budget" placeholder="cth. 300000" min="0" step="1000"></div>
-      <button type="submit" class="cta">Tambah</button>
+      <div class="field"><label for="new-cat-budget">Monthly Budget (optional)</label><input type="number" id="new-cat-budget" placeholder="e.g. 300000" min="0" step="1000"></div>
+      <button type="submit" class="cta">Add</button>
     </form>
   </section>
 
-  <!-- ============ KELOLA AKUN BANK ============ -->
+  <!-- ============ MANAGE BANK ACCOUNTS ============ -->
   <section id="view-manage-accounts" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h1>Kelola Akun Bank</h1>
+      <h1>Manage Bank Accounts</h1>
       <div style="width:36px;"></div>
     </div>
     <div class="setting-card" id="manage-acct-list" style="margin-bottom:18px;"></div>
     <button type="button" class="cta" data-nav="add-account">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-      Tambah Bank
+      Add Bank
     </button>
   </section>
 
-  <!-- ============ TAMBAH BANK ============ -->
+  <!-- ============ ADD BANK ============ -->
   <section id="view-add-account" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="manage-accounts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-      <h1>Tambah Bank</h1>
+      <h1>Add Bank</h1>
       <div style="width:36px;"></div>
     </div>
     <form id="add-account-form">
-      <div class="field"><label for="new-acct-name">Nama Bank / Dompet</label><input type="text" id="new-acct-name" placeholder="cth. Jenius, Blu, DANA" required></div>
+      <div class="field"><label for="new-acct-name">Bank / Wallet Name</label><input type="text" id="new-acct-name" placeholder="e.g. Jenius, Blu, DANA" required></div>
       <div class="field">
-        <label>Jenis</label>
+        <label>Type</label>
         <div class="chip-row" id="new-acct-kind">
           <button type="button" class="chip active" data-kind="bank">🏦 Bank</button>
           <button type="button" class="chip" data-kind="ewallet">📱 E-wallet</button>
-          <button type="button" class="chip" data-kind="cash">💵 Tunai</button>
-          <button type="button" class="chip" data-kind="credit_card">💳 Kartu Kredit</button>
+          <button type="button" class="chip" data-kind="cash">💵 Cash</button>
+          <button type="button" class="chip" data-kind="credit_card">💳 Credit Card</button>
         </div>
       </div>
-      <div class="field"><label for="new-acct-number">No. Rekening / Kartu (opsional)</label><input type="text" id="new-acct-number" placeholder="•••• 1234"></div>
-      <div class="field"><label for="new-acct-balance">Saldo Awal</label><input type="number" id="new-acct-balance" placeholder="0" min="0" step="1000" value="0"></div>
+      <div class="field"><label for="new-acct-number">Account / Card Number (optional)</label><input type="text" id="new-acct-number" placeholder="•••• 1234"></div>
+      <div class="field"><label for="new-acct-balance">Starting Balance</label><input type="number" id="new-acct-balance" placeholder="0" min="0" step="1000" value="0"></div>
       <div class="field">
-        <label>Warna Label</label>
+        <label>Label Color</label>
         <div class="color-pick" id="new-acct-color">
           <button type="button" class="swatch active" data-color="lavender" style="background:var(--lavender);"></button>
           <button type="button" class="swatch" data-color="mint" style="background:var(--mint);"></button>
@@ -375,12 +375,12 @@
       </div>
       <button type="submit" class="cta" style="margin-top:8px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-        Simpan Bank
+        Save Bank
       </button>
     </form>
   </section>
 
-  <!-- ============ PASANG KE HOME SCREEN ============ -->
+  <!-- ============ ADD TO HOME SCREEN ============ -->
   <section id="view-install-guide" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" data-nav="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
@@ -388,53 +388,53 @@
       <div style="width:36px;"></div>
     </div>
     <div class="card" style="margin-bottom:14px;">
-      <div class="section-title" style="margin-top:0;">1. Tambahkan ke Home Screen</div>
-      <p class="muted" style="font-size:13px;line-height:1.6;">Buka Catetin di Safari → tombol Share (kotak dengan panah ke atas) → "Add to Home Screen" → Add. Ikon Catetin akan muncul di layar utama dan terbuka tanpa address bar.</p>
+      <div class="section-title" style="margin-top:0;">1. Add to Home Screen</div>
+      <p class="muted" style="font-size:13px;line-height:1.6;">Open Financial Tracker in Safari → tap the Share button (square with an arrow up) → "Add to Home Screen" → Add. The app icon appears on your home screen and opens without the address bar.</p>
     </div>
     <div class="card">
-      <div class="section-title" style="margin-top:0;">2. Setel Back Tap</div>
-      <p class="muted" style="font-size:13px;line-height:1.6;">Settings → Accessibility → Touch → Back Tap → Double Tap → pilih Shortcut yang membuka URL Catetin. Ketuk 2x bagian belakang iPhone akan langsung membuka layar Catat.</p>
+      <div class="section-title" style="margin-top:0;">2. Set Up Back Tap</div>
+      <p class="muted" style="font-size:13px;line-height:1.6;">Settings → Accessibility → Touch → Back Tap → Double Tap → choose the Shortcut that opens Financial Tracker's URL. Double-tapping the back of your iPhone will then jump straight to the Add screen.</p>
     </div>
   </section>
 
-  <!-- ============ SCAN STRUK ============ -->
+  <!-- ============ SCAN RECEIPT ============ -->
   <section id="view-scan" class="view scan-view" hidden style="padding:0;">
     <button class="close-x" id="btn-scan-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    <span class="scan-caption" id="scan-caption">Arahkan kamera ke struk</span>
+    <span class="scan-caption" id="scan-caption">Point camera at receipt</span>
     <p class="scan-progress" id="scan-progress" hidden></p>
     <div class="privacy-chip">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3Z"/></svg>
-      Diproses di HP-mu, tidak dikirim ke server
+      Processed on your phone, never sent to a server
     </div>
     <div class="scan-controls">
-      <button class="ghost-btn" id="btn-scan-gallery" title="Pilih dari galeri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>
-      <button class="shutter" id="btn-scan-shutter" title="Ambil foto"></button>
+      <button class="ghost-btn" id="btn-scan-gallery" title="Choose from gallery"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>
+      <button class="shutter" id="btn-scan-shutter" title="Take photo"></button>
       <div style="width:42px;"></div>
     </div>
     <input type="file" accept="image/*" capture="environment" id="scan-input-camera" hidden>
     <input type="file" accept="image/*" id="scan-input-gallery" hidden>
   </section>
 
-  <!-- ============ HASIL SCAN ============ -->
+  <!-- ============ SCAN RESULT ============ -->
   <section id="view-scan-result" class="view" hidden>
     <div class="header-row">
       <button class="icon-btn" id="btn-scan-result-back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
-      <h1>Hasil Scan</h1>
+      <h1>Scan Result</h1>
       <span class="accuracy-chip" id="scan-accuracy">—</span>
     </div>
-    <p class="muted" style="font-size:12px;margin:-8px 0 16px;">Periksa &amp; perbaiki sebelum disimpan.</p>
+    <p class="muted" style="font-size:12px;margin:-8px 0 16px;">Review &amp; fix before saving.</p>
 
-    <div class="field"><label for="scan-merchant">Toko</label><input type="text" id="scan-merchant" placeholder="Nama toko"></div>
+    <div class="field"><label for="scan-merchant">Merchant</label><input type="text" id="scan-merchant" placeholder="Merchant name"></div>
     <div class="row" style="gap:12px;">
-      <div class="field" style="flex:1;"><label for="scan-date">Tanggal</label><input type="date" id="scan-date"></div>
-      <div class="field" style="flex:1;"><label for="scan-account">Bayar dari</label><select id="scan-account"></select></div>
+      <div class="field" style="flex:1;"><label for="scan-date">Date</label><input type="date" id="scan-date"></div>
+      <div class="field" style="flex:1;"><label for="scan-account">Pay from</label><select id="scan-account"></select></div>
     </div>
-    <div class="field"><label for="scan-category">Kategori</label><select id="scan-category"></select></div>
-    <div class="field"><label for="scan-trip">Acara (opsional)</label><select id="scan-trip"><option value="">Umum</option></select></div>
+    <div class="field"><label for="scan-category">Category</label><select id="scan-category"></select></div>
+    <div class="field"><label for="scan-trip">Event (optional)</label><select id="scan-trip"><option value="">General</option></select></div>
 
-    <div class="section-title">Item Belanja</div>
+    <div class="section-title">Purchased Items</div>
     <div class="card" style="padding:4px 16px;" id="scan-items-list"></div>
-    <button type="button" class="link" id="btn-scan-add-item" style="margin-top:10px;">+ Tambah item</button>
+    <button type="button" class="link" id="btn-scan-add-item" style="margin-top:10px;">+ Add item</button>
 
     <div class="between" style="margin-top:16px;padding:0 4px;">
       <span style="font-weight:700;font-size:14px;">Total</span>
@@ -443,17 +443,17 @@
 
     <button type="button" class="cta mint" id="btn-scan-save">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-      Simpan sebagai Pengeluaran
+      Save as Expense
     </button>
   </section>
 
   <!-- ============ NAV BAR ============ -->
   <nav class="navbar" id="navbar" hidden>
-    <button class="navitem" data-nav="dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Beranda</span></button>
-    <button class="navitem" data-nav="history"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Riwayat</span></button>
+    <button class="navitem" data-nav="dashboard"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Home</span></button>
+    <button class="navitem" data-nav="history"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>History</span></button>
     <button class="fab" data-nav="catat"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>
-    <button class="navitem" data-nav="budget"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 3"/></svg><span>Anggaran</span></button>
-    <button class="navitem" data-nav="settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9c.2.6.7 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span>Setelan</span></button>
+    <button class="navitem" data-nav="budget"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 3"/></svg><span>Budget</span></button>
+    <button class="navitem" data-nav="settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9c.2.6.7 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span>Settings</span></button>
   </nav>
 
 </div>

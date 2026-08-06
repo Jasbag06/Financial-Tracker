@@ -6,16 +6,16 @@ Catetin.seedDefaultsIfEmpty = async function () {
   var uid = Catetin.state.user.id;
   if (Catetin.state.categories.length === 0) {
     await Catetin.supabase.from('categories').insert([
-      { user_id: uid, name: 'Makan & Minum', type: 'expense', icon: '🍜', sort_order: 1 },
+      { user_id: uid, name: 'Food & Drink', type: 'expense', icon: '🍜', sort_order: 1 },
       { user_id: uid, name: 'Transport', type: 'expense', icon: '🛵', sort_order: 2 },
-      { user_id: uid, name: 'Belanja', type: 'expense', icon: '🛍️', sort_order: 3 },
-      { user_id: uid, name: 'Tagihan', type: 'expense', icon: '🧾', sort_order: 4 },
-      { user_id: uid, name: 'Hiburan', type: 'expense', icon: '🎮', sort_order: 5 },
-      { user_id: uid, name: 'Kesehatan', type: 'expense', icon: '💊', sort_order: 6 },
-      { user_id: uid, name: 'Lainnya', type: 'expense', icon: '📦', sort_order: 7 },
-      { user_id: uid, name: 'Gaji', type: 'income', icon: '💼', sort_order: 1 },
+      { user_id: uid, name: 'Shopping', type: 'expense', icon: '🛍️', sort_order: 3 },
+      { user_id: uid, name: 'Bills', type: 'expense', icon: '🧾', sort_order: 4 },
+      { user_id: uid, name: 'Entertainment', type: 'expense', icon: '🎮', sort_order: 5 },
+      { user_id: uid, name: 'Health', type: 'expense', icon: '💊', sort_order: 6 },
+      { user_id: uid, name: 'Other', type: 'expense', icon: '📦', sort_order: 7 },
+      { user_id: uid, name: 'Salary', type: 'income', icon: '💼', sort_order: 1 },
       { user_id: uid, name: 'Bonus', type: 'income', icon: '🎁', sort_order: 2 },
-      { user_id: uid, name: 'Lainnya', type: 'income', icon: '📥', sort_order: 3 }
+      { user_id: uid, name: 'Other', type: 'income', icon: '📥', sort_order: 3 }
     ]);
   }
   if (Catetin.state.accounts.length === 0) {
@@ -40,7 +40,7 @@ Catetin.onAuthed = async function () {
 if (Catetin.configReady) {
   Catetin.auth.init();
 } else {
-  document.getElementById('auth-sub').textContent = 'Isi js/config.js dengan URL & anon key Supabase kamu dulu (lihat README.md).';
+  document.getElementById('auth-sub').textContent = 'Fill in js/config.js with your Supabase URL & anon key first (see README.md).';
   document.getElementById('auth-form').hidden = true;
   document.getElementById('auth-toggle-mode').hidden = true;
   document.getElementById('app').hidden = false;

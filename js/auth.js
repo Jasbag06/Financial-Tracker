@@ -25,8 +25,8 @@ Catetin.auth.init = async function () {
 
 document.getElementById('auth-toggle-mode').addEventListener('click', function () {
   Catetin.auth.mode = Catetin.auth.mode === 'signin' ? 'signup' : 'signin';
-  document.getElementById('auth-submit').textContent = Catetin.auth.mode === 'signin' ? 'Masuk' : 'Daftar';
-  this.textContent = Catetin.auth.mode === 'signin' ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Masuk';
+  document.getElementById('auth-submit').textContent = Catetin.auth.mode === 'signin' ? 'Sign In' : 'Sign Up';
+  this.textContent = Catetin.auth.mode === 'signin' ? "Don't have an account? Sign Up" : 'Already have an account? Sign In';
   document.getElementById('auth-error').textContent = '';
 });
 
@@ -49,29 +49,29 @@ document.getElementById('auth-form').addEventListener('submit', async function (
     if (res.error) throw res.error;
     if (Catetin.auth.mode === 'signup' && !res.data.session) {
       errEl.style.color = 'var(--mint-ink)';
-      errEl.textContent = 'Cek email kamu untuk konfirmasi akun, lalu masuk.';
+      errEl.textContent = 'Check your email to confirm your account, then sign in.';
       document.getElementById('auth-toggle-mode').click();
       return;
     }
     Catetin.state.user = res.data.session.user;
     await Catetin.onAuthed();
   } catch (err) {
-    errEl.textContent = err.message || 'Gagal masuk. Coba lagi.';
+    errEl.textContent = err.message || 'Failed to sign in. Please try again.';
   } finally {
     btn.disabled = false;
   }
 });
 
 document.getElementById('btn-logout').addEventListener('click', async function () {
-  var ok = await Catetin.modal.confirm({ title: 'Keluar dari Catetin?', confirmLabel: 'Keluar', danger: true });
+  var ok = await Catetin.modal.confirm({ title: 'Log out of Financial Tracker?', confirmLabel: 'Log Out', danger: true });
   if (!ok) return;
   await Catetin.supabase.auth.signOut();
 });
 
 document.getElementById('btn-change-password').addEventListener('click', async function () {
-  var pw = await Catetin.modal.prompt({ title: 'Kata Sandi Baru', placeholder: 'Minimal 6 karakter', type: 'password', confirmLabel: 'Ubah' });
+  var pw = await Catetin.modal.prompt({ title: 'New Password', placeholder: 'At least 6 characters', type: 'password', confirmLabel: 'Change' });
   if (!pw) return;
-  if (pw.length < 6) { Catetin.toast('Kata sandi minimal 6 karakter'); return; }
+  if (pw.length < 6) { Catetin.toast('Password must be at least 6 characters'); return; }
   var { error } = await Catetin.supabase.auth.updateUser({ password: pw });
-  Catetin.toast(error ? 'Gagal ubah kata sandi' : 'Kata sandi diperbarui');
+  Catetin.toast(error ? 'Failed to change password' : 'Password updated');
 });

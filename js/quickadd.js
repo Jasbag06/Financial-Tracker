@@ -79,7 +79,7 @@ document.getElementById('keypad').addEventListener('click', function (e) {
     if (cur.length > 12) cur = cur.slice(0, 12);
   }
   Catetin.quickadd.amountStr = cur || '0';
-  document.getElementById('amount-display').textContent = Number(Catetin.quickadd.amountStr).toLocaleString('id-ID');
+  document.getElementById('amount-display').textContent = Number(Catetin.quickadd.amountStr).toLocaleString('en-US');
   document.getElementById('btn-catat-next').disabled = Number(Catetin.quickadd.amountStr) <= 0;
 });
 
@@ -98,7 +98,7 @@ Catetin.quickadd.renderCategoryGrid = function () {
   var grid = document.getElementById('cat-grid');
   grid.innerHTML = cats.map(function (c) {
     return '<div class="cat-tile" data-cat-name="' + Catetin.escapeHtml(c.name) + '"><div class="ic" style="background:var(--surface-2);">' + c.icon + '</div><span>' + Catetin.escapeHtml(c.name) + '</span></div>';
-  }).join('') + '<div class="cat-tile add-tile" style="border-style:dashed;" id="btn-add-cat-inline"><div class="ic" style="background:var(--surface-2);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Tambah</span></div>';
+  }).join('') + '<div class="cat-tile add-tile" style="border-style:dashed;" id="btn-add-cat-inline"><div class="ic" style="background:var(--surface-2);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></div><span>Add</span></div>';
 
   grid.querySelectorAll('.cat-tile:not(.add-tile)').forEach(function (tile) {
     tile.addEventListener('click', function () {
@@ -119,7 +119,7 @@ Catetin.quickadd.renderCategoryGrid = function () {
       user_id: Catetin.state.user.id, name: result.name, type: Catetin.quickadd.type, icon: result.icon,
       sort_order: cats.length + 1
     });
-    if (error) { Catetin.toast('Gagal menambah kategori'); return; }
+    if (error) { Catetin.toast('Failed to add category'); return; }
     await Catetin.reloadAll();
     Catetin.quickadd.renderCategoryGrid();
   });
@@ -144,20 +144,20 @@ Catetin.quickadd.renderAccountChips = function () {
 Catetin.quickadd.renderTripChips = function () {
   var row = document.getElementById('txn-trip-row');
   var trips = Catetin.upcomingTrips();
-  row.innerHTML = '<button type="button" class="chip active" data-trip-id="" style="flex:none;">Umum</button>'
+  row.innerHTML = '<button type="button" class="chip active" data-trip-id="" style="flex:none;">General</button>'
     + trips.map(function (tr) { return '<button type="button" class="chip" data-trip-id="' + tr.id + '" style="flex:none;">' + tr.icon + ' ' + Catetin.escapeHtml(tr.name) + '</button>'; }).join('')
-    + '<button type="button" class="chip" data-trip-id="new" style="flex:none;">+ Baru</button>';
+    + '<button type="button" class="chip" data-trip-id="new" style="flex:none;">+ New</button>';
   Catetin.quickadd.tripId = null;
 
   row.querySelectorAll('.chip').forEach(function (chip) {
     chip.addEventListener('click', async function () {
       if (chip.dataset.tripId === 'new') {
-        var name = await Catetin.modal.prompt({ title: 'Acara Baru', placeholder: 'cth. Pergi ke Bandung' });
+        var name = await Catetin.modal.prompt({ title: 'New Event', placeholder: 'e.g. Trip to Bandung' });
         if (!name) return;
         var { data, error } = await Catetin.supabase.from('trips').insert({
           user_id: Catetin.state.user.id, name: name, icon: '🧳', start_date: new Date().toISOString().slice(0, 10)
         }).select().single();
-        if (error) { Catetin.toast('Gagal membuat acara'); return; }
+        if (error) { Catetin.toast('Failed to create event'); return; }
         await Catetin.reloadAll();
         Catetin.quickadd.renderTripChips();
         Catetin.quickadd.tripId = data.id;
@@ -182,7 +182,7 @@ document.getElementById('recurring-row').addEventListener('click', function (e) 
 
 Catetin.quickadd.updateCatReminder = function () {
   var amt = Catetin.fmtRp(Number(Catetin.quickadd.amountStr));
-  var typeLabel = Catetin.quickadd.type === 'expense' ? 'Pengeluaran' : 'Pemasukan';
+  var typeLabel = Catetin.quickadd.type === 'expense' ? 'Expense' : 'Income';
   document.getElementById('cat-reminder').innerHTML = '<span style="color:' + (Catetin.quickadd.type === 'expense' ? 'var(--coral-ink)' : 'var(--mint-ink)') + ';">●</span> ' + amt + ' · ' + typeLabel;
   if (Catetin.quickadd.category) {
     var cat = Catetin.state.categories.find(function (c) { return c.name === Catetin.quickadd.category; });
@@ -192,7 +192,7 @@ Catetin.quickadd.updateCatReminder = function () {
 
 document.getElementById('btn-save-txn').addEventListener('click', async function () {
   var qa = Catetin.quickadd;
-  if (!qa.category || !qa.account || Number(qa.amountStr) <= 0) { Catetin.toast('Lengkapi data dulu'); return; }
+  if (!qa.category || !qa.account || Number(qa.amountStr) <= 0) { Catetin.toast('Please fill in all fields'); return; }
   var btn = this; btn.disabled = true;
   var { error } = await Catetin.supabase.from('transactions').insert({
     user_id: Catetin.state.user.id,
@@ -206,7 +206,7 @@ document.getElementById('btn-save-txn').addEventListener('click', async function
     trip_id: qa.tripId || null
   });
   btn.disabled = false;
-  if (error) { Catetin.toast('Gagal menyimpan'); return; }
+  if (error) { Catetin.toast('Failed to save'); return; }
   await Catetin.reloadAll();
   var toastEl = document.getElementById('catat-toast');
   toastEl.classList.add('show');
