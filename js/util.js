@@ -2,7 +2,7 @@ window.Catetin = window.Catetin || {};
 
 Catetin.fmtRp = function (n) {
   n = Math.round(Number(n) || 0);
-  return 'Rp ' + n.toLocaleString('en-US');
+  return 'Rp ' + n.toLocaleString('id-ID');
 };
 
 Catetin.fmtShort = function (n) {

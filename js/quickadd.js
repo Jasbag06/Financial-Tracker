@@ -79,7 +79,7 @@ document.getElementById('keypad').addEventListener('click', function (e) {
     if (cur.length > 12) cur = cur.slice(0, 12);
   }
   Catetin.quickadd.amountStr = cur || '0';
-  document.getElementById('amount-display').textContent = Number(Catetin.quickadd.amountStr).toLocaleString('en-US');
+  document.getElementById('amount-display').textContent = Number(Catetin.quickadd.amountStr).toLocaleString('id-ID');
   document.getElementById('btn-catat-next').disabled = Number(Catetin.quickadd.amountStr) <= 0;
 });
 
