@@ -1,4 +1,4 @@
-# Catetin
+# Financial Tracker
 
 Pencatat pengeluaran & pemasukan harian — PWA (HTML/CSS/JS polos, tanpa build step), pakai Supabase sebagai backend, dengan scan struk belanja lewat OCR yang jalan langsung di HP (Tesseract.js, tidak ada foto yang dikirim ke server manapun).
 
@@ -51,12 +51,16 @@ Lalu di repo GitHub: **Settings → Pages → Source: Deploy from branch → mai
 
 ## 5. Pasang ke Home Screen & Back Tap (iPhone)
 
-Instruksi yang sama juga ada di dalam app: **Pengaturan → Pasang ke Home Screen & Back Tap**.
+Instruksi yang sama juga ada di dalam app: **Settings → Add to Home Screen & Back Tap**.
 
-1. Buka URL Catetin kamu di Safari.
-2. Ketuk tombol **Share** → **Add to Home Screen** → **Add**. Ikon Catetin muncul di layar utama, terbuka full-screen tanpa address bar.
-3. **Settings → Accessibility → Touch → Back Tap → Double Tap** → pilih Shortcut yang membuka URL Catetin (buat lewat app Shortcuts: action "Open URL" ke alamat Catetin kamu).
-4. Karena layar **Catat** adalah landing screen default (bukan Beranda), ketuk 2x belakang iPhone akan langsung membuka keypad input, siap dipakai dalam ~3 tap.
+1. Buka URL app kamu di Safari.
+2. Ketuk tombol **Share** → **Add to Home Screen** → **Add**. Ikon app muncul di layar utama, terbuka full-screen tanpa address bar.
+3. **Settings → Accessibility → Touch → Back Tap → Double Tap** → pilih Shortcut yang membuka URL app kamu (buat lewat app Shortcuts: action "Open URL" ke alamat app kamu).
+4. Karena layar **Add** adalah landing screen default (bukan Home), ketuk 2x belakang iPhone akan langsung membuka keypad input, siap dipakai dalam ~3 tap.
+
+## 6. (Opsional) Input transaksi lewat iOS Shortcuts, tanpa buka app
+
+Ada jalur lain yang lebih cepat dari Back Tap di atas: Shortcut yang langsung nulis ke database lewat beberapa menu pilihan, nggak buka app sama sekali. Lihat [`SHORTCUTS.md`](SHORTCUTS.md) untuk setup lengkapnya (migrasi database, ambil token, dan cara rakit Shortcut-nya step-by-step).
 
 ## Ikon aplikasi
 
@@ -66,8 +70,7 @@ Instruksi yang sama juga ada di dalam app: **Pengaturan → Pasang ke Home Scree
 
 - **OCR (Tesseract.js)**: akurasi tergantung kualitas foto struk — selalu tampilkan hasil di form koreksi sebelum simpan (`~85%` di badge itu skor confidence dari Tesseract, bukan jaminan).
 - **Riwayat & saldo dihitung di client**: semua transaksi user di-fetch sekaligus lalu dijumlah di JS (`js/state.js`). Cukup untuk pemakaian personal; kalau volume transaksi sudah sangat besar (puluhan ribu baris selama bertahun-tahun), pertimbangkan pindah ke agregasi lewat SQL view/RPC.
-- **Edit transaksi** di Riwayat masih pakai `window.prompt` sederhana (jumlah & catatan saja) — cukup untuk koreksi cepat, belum ada form edit penuh.
-- **Notifikasi** di Pengaturan baru toggle preferensi lokal (localStorage) — belum ada push notification sungguhan (butuh setup APNs/web push terpisah).
+- **Notifikasi** di Settings baru toggle preferensi lokal (localStorage) — belum ada push notification sungguhan (butuh setup APNs/web push terpisah).
 
 ## Roadmap (belum dibangun)
 
