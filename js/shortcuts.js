@@ -9,9 +9,11 @@ Catetin.randomHex = function (numBytes) {
 Catetin.getOrCreateShortcutToken = async function () {
   var uid = Catetin.state.user.id;
   var existing = await Catetin.supabase.from('shortcut_tokens').select('token').eq('user_id', uid).maybeSingle();
-  if (existing.data && existing.data.token) return existing.data.token;
+  if (existing.error) return { error: existing.error.message };
+  if (existing.data && existing.data.token) return { token: existing.data.token };
   var created = await Catetin.supabase.from('shortcut_tokens').insert({ user_id: uid }).select('token').single();
-  return created.data ? created.data.token : null;
+  if (created.error) return { error: created.error.message };
+  return { token: created.data.token };
 };
 
 Catetin.regenerateShortcutToken = async function () {
@@ -66,7 +68,14 @@ Catetin.showShortcutTokenModal = function (token) {
 };
 
 document.getElementById('btn-shortcut-token').addEventListener('click', async function () {
-  var token = await Catetin.getOrCreateShortcutToken();
-  if (!token) { Catetin.toast('Failed to load token'); return; }
-  Catetin.showShortcutTokenModal(token);
+  var result = await Catetin.getOrCreateShortcutToken();
+  if (result.error) {
+    Catetin.toast(
+      /relation .* does not exist|schema cache/i.test(result.error)
+        ? 'Run migration-002-shortcuts.sql in Supabase first'
+        : 'Failed to load token: ' + result.error
+    );
+    return;
+  }
+  Catetin.showShortcutTokenModal(result.token);
 });
