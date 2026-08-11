@@ -56,6 +56,20 @@ Catetin.applyMaskState = function () {
   var hidden = document.body.classList.contains('balances-hidden');
   document.querySelectorAll('.real').forEach(function (el) { el.style.display = hidden ? 'none' : ''; });
   document.querySelectorAll('.masked').forEach(function (el) { el.style.display = hidden ? 'inline' : 'none'; });
+
+  // Known WebKit/iOS Safari quirk: content inside a horizontally-scrolling
+  // overflow container sometimes doesn't repaint when a child's display
+  // changes, until some other layout event (like a scroll) happens. Force
+  // a synchronous reflow on the scroll containers so the toggle shows up
+  // immediately instead of only after navigating away and back.
+  ['acct-scroll', 'trip-scroll'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var prevTransform = el.style.webkitTransform;
+    el.style.webkitTransform = 'translateZ(0)';
+    void el.offsetHeight;
+    el.style.webkitTransform = prevTransform;
+  });
 };
 
 // Self-healing watchdog: some devices were seen with individual trip cards
