@@ -45,6 +45,7 @@ Catetin.renderDashboard = function () {
   Catetin.renderDonut(monthTx.filter(function (t) { return t.type === 'expense'; }));
   Catetin.renderRecentTxns();
   Catetin.applyMaskState();
+  Catetin.initMaskWatchdog();
 };
 
 // Belt-and-suspenders on top of the CSS rules: directly enforce the
@@ -55,6 +56,22 @@ Catetin.applyMaskState = function () {
   var hidden = document.body.classList.contains('balances-hidden');
   document.querySelectorAll('.real').forEach(function (el) { el.style.display = hidden ? 'none' : ''; });
   document.querySelectorAll('.masked').forEach(function (el) { el.style.display = hidden ? 'inline' : 'none'; });
+};
+
+// Self-healing watchdog: some devices were seen with individual trip cards
+// drifting out of sync with the account cards after repeated eye-toggle
+// clicks (root cause never pinned down remotely). Rather than trust every
+// code path to call applyMaskState at the right time, just re-run it
+// automatically whenever the account/trip scroll containers' contents
+// change at all, so it can't stay wrong for more than a moment.
+Catetin.initMaskWatchdog = function () {
+  if (Catetin._maskWatchdogStarted) return;
+  Catetin._maskWatchdogStarted = true;
+  var observer = new MutationObserver(function () { Catetin.applyMaskState(); });
+  ['acct-scroll', 'trip-scroll'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el, { childList: true, subtree: true });
+  });
 };
 
 Catetin.renderDonut = function (expenseTx) {
