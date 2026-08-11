@@ -38,11 +38,23 @@ Catetin.renderDashboard = function () {
   document.getElementById('acct-scroll').innerHTML = html;
   document.getElementById('btn-eye-toggle').addEventListener('click', function () {
     document.body.classList.toggle('balances-hidden');
+    Catetin.applyMaskState();
   });
 
   Catetin.renderTripCardsOnDashboard();
   Catetin.renderDonut(monthTx.filter(function (t) { return t.type === 'expense'; }));
   Catetin.renderRecentTxns();
+  Catetin.applyMaskState();
+};
+
+// Belt-and-suspenders on top of the CSS rules: directly enforce the
+// hide/show state on every .real/.masked element via inline style,
+// so a fresh render (new account/trip cards) can never end up out of
+// sync with whatever is currently masked, regardless of CSS quirks.
+Catetin.applyMaskState = function () {
+  var hidden = document.body.classList.contains('balances-hidden');
+  document.querySelectorAll('.real').forEach(function (el) { el.style.display = hidden ? 'none' : ''; });
+  document.querySelectorAll('.masked').forEach(function (el) { el.style.display = hidden ? 'inline' : 'none'; });
 };
 
 Catetin.renderDonut = function (expenseTx) {
