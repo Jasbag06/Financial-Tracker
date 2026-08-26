@@ -222,6 +222,15 @@ body.balances-hidden .acct-balance .masked, body.balances-hidden .trip-total .ma
 .budget-track{ height:9px; border-radius:6px; background:var(--surface-2); overflow:hidden; margin-top:7px; }
 .budget-fill{ height:100%; border-radius:6px; }
 
+/* ---- monthly recap ---- */
+.recap-stat{ flex:1; text-align:center; }
+.recap-cat-row{ cursor:pointer; }
+.recap-cat-row .chevron{ transition:transform .2s; flex:none; color:var(--text-muted); }
+.recap-cat-row.open .chevron{ transform:rotate(90deg); }
+.recap-cat-txns{ padding:0 0 10px 50px; }
+.recap-acct-row{ margin-bottom:16px; }
+.recap-acct-row:last-child{ margin-bottom:0; }
+
 /* ---- settings ---- */
 .avatar-circle{ width:52px; height:52px; border-radius:50%; background:var(--ink-card); display:flex; align-items:center; justify-content:center; color:#F4EEE2; font-weight:700; font-size:18px; flex:none; }
 .setting-card{ background:var(--surface); border:1px solid var(--border); border-radius:18px; overflow:hidden; }

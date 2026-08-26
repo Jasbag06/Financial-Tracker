@@ -180,8 +180,49 @@
 
   <!-- ============ BUDGET ============ -->
   <section id="view-budget" class="view" hidden>
-    <div class="header-row"><h1>Budget</h1><span class="muted" style="font-size:12px;" id="budget-month-label"></span></div>
+    <div class="header-row">
+      <h1>Budget</h1>
+      <button class="icon-btn" data-nav="recap" title="Monthly Recap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></button>
+    </div>
+    <div class="muted" style="font-size:12px;margin:-10px 0 16px;" id="budget-month-label"></div>
     <div id="budget-list"></div>
+  </section>
+
+  <!-- ============ MONTHLY RECAP ============ -->
+  <section id="view-recap" class="view" hidden>
+    <div class="header-row">
+      <button class="icon-btn" data-nav="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h1>Monthly Recap</h1>
+      <div style="width:36px;"></div>
+    </div>
+
+    <div class="between" style="margin:-8px 0 18px;">
+      <button class="icon-btn" id="btn-recap-prev-month"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span style="font-weight:700;font-size:15px;" id="recap-month-label">—</span>
+      <button class="icon-btn" id="btn-recap-next-month"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
+
+    <div class="card" style="padding:18px;margin-bottom:22px;">
+      <div class="row">
+        <div class="recap-stat"><div class="muted" style="font-size:11.5px;">Income</div><div class="mono" style="font-weight:700;color:var(--mint-ink);font-size:15px;margin-top:4px;" id="recap-income">Rp 0</div></div>
+        <div class="recap-stat"><div class="muted" style="font-size:11.5px;">Expense</div><div class="mono" style="font-weight:700;color:var(--coral-ink);font-size:15px;margin-top:4px;" id="recap-expense">Rp 0</div></div>
+        <div class="recap-stat"><div class="muted" style="font-size:11.5px;">Net</div><div class="mono" style="font-weight:700;font-size:15px;margin-top:4px;" id="recap-net">Rp 0</div></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0;">Spending by Category</div>
+    <div class="card donut-wrap" style="margin-bottom:10px;">
+      <svg width="88" height="88" viewBox="0 0 36 36" style="flex:none;" id="recap-donut-svg"></svg>
+      <div class="donut-legend" id="recap-donut-legend"></div>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin:-2px 0 10px;">Tap a category to see what it was spent on</p>
+    <div class="card" id="recap-cat-list" style="padding:6px 16px;margin-bottom:22px;"></div>
+
+    <div class="section-title">Spending by Account</div>
+    <div class="card" id="recap-acct-list" style="padding:16px;margin-bottom:22px;"></div>
+
+    <div class="section-title">All Transactions</div>
+    <div id="recap-txn-list"></div>
   </section>
 
   <!-- ============ EVENTS (list) ============ -->
@@ -274,6 +315,11 @@
         <div class="icon-chip" style="background:#E1E2F5;">🏦</div>
         <div class="label">Manage Bank Accounts</div>
         <div class="value" id="account-count">—</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <button type="button" class="setting-row" data-nav="recap">
+        <div class="icon-chip" style="background:#FBEEDA;">📊</div>
+        <div class="label">Monthly Recap</div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </button>
     </div>
@@ -504,6 +550,7 @@
 <script src="js/quickadd.js"></script>
 <script src="js/history.js"></script>
 <script src="js/budget.js"></script>
+<script src="js/recap.js"></script>
 <script src="js/categories.js"></script>
 <script src="js/accounts.js"></script>
 <script src="js/settings.js"></script>

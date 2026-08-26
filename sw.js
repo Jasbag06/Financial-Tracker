@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catetin-shell-v21';
+const CACHE_NAME = 'catetin-shell-v22';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const SHELL_FILES = [
   './js/quickadd.js',
   './js/history.js',
   './js/budget.js',
+  './js/recap.js',
   './js/categories.js',
   './js/accounts.js',
   './js/settings.js',

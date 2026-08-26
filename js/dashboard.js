@@ -88,13 +88,13 @@ Catetin.initMaskWatchdog = function () {
   });
 };
 
-Catetin.renderDonut = function (expenseTx) {
+Catetin.renderDonut = function (expenseTx, svgId, legendId) {
   var byCat = {};
   expenseTx.forEach(function (t) { byCat[t.category] = (byCat[t.category] || 0) + Number(t.amount); });
   var entries = Object.keys(byCat).map(function (k) { return { name: k, amount: byCat[k] }; }).sort(function (a, b) { return b.amount - a.amount; });
   var total = entries.reduce(function (s, e) { return s + e.amount; }, 0);
-  var svg = document.getElementById('donut-svg');
-  var legend = document.getElementById('donut-legend');
+  var svg = document.getElementById(svgId || 'donut-svg');
+  var legend = document.getElementById(legendId || 'donut-legend');
 
   if (total === 0) {
     svg.innerHTML = '<circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--surface-2)" stroke-width="4"/>';

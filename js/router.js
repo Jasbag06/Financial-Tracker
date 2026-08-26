@@ -2,7 +2,7 @@ window.Catetin = window.Catetin || {};
 
 Catetin.VIEWS = ['auth', 'dashboard', 'catat', 'history', 'budget', 'settings',
   'manage-categories', 'manage-accounts', 'add-account', 'install-guide', 'scan', 'scan-result',
-  'trips', 'add-trip', 'trip-detail'];
+  'trips', 'add-trip', 'trip-detail', 'recap'];
 Catetin.NAV_VIEWS = ['dashboard', 'history', 'budget', 'settings'];
 
 Catetin.router = { current: null, onEnter: {} };
