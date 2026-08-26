@@ -1,10 +1,11 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.recap = { month: new Date().toISOString().slice(0, 7), openCat: null };
+Catetin.recap = { month: new Date().toISOString().slice(0, 7), openCat: null, openEvent: null };
 
 Catetin.router.onEnter.recap = function () {
   Catetin.recap.month = new Date().toISOString().slice(0, 7);
   Catetin.recap.openCat = null;
+  Catetin.recap.openEvent = null;
   Catetin.renderRecap();
 };
 
@@ -13,6 +14,7 @@ Catetin.recap.shiftMonth = function (delta) {
   var d = new Date(Number(parts[0]), Number(parts[1]) - 1 + delta, 1);
   Catetin.recap.month = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
   Catetin.recap.openCat = null;
+  Catetin.recap.openEvent = null;
   Catetin.renderRecap();
 };
 
@@ -41,6 +43,7 @@ Catetin.renderRecap = function () {
 
   Catetin.renderDonut(expenseTx, 'recap-donut-svg', 'recap-donut-legend');
   Catetin.recap.renderCategoryList(expenseTx, expense);
+  Catetin.recap.renderEventList(expenseTx, expense);
   Catetin.recap.renderAccountList(expenseTx, expense);
 
   if (monthTx.length === 0) {
@@ -89,6 +92,55 @@ Catetin.recap.renderCategoryList = function (expenseTx, total) {
       var name = row.dataset.recapCat;
       Catetin.recap.openCat = (Catetin.recap.openCat === name) ? null : name;
       Catetin.recap.renderCategoryList(expenseTx, total);
+    });
+  });
+};
+
+// Groups the month's expenses by Event/Acara (untagged transactions fall
+// under "General"), same expand-to-see-transactions pattern as the category
+// breakdown above.
+Catetin.recap.renderEventList = function (expenseTx, total) {
+  var byTrip = {};
+  expenseTx.forEach(function (t) {
+    var key = t.trip_id || 'general';
+    if (!byTrip[key]) byTrip[key] = [];
+    byTrip[key].push(t);
+  });
+  var entries = Object.keys(byTrip).map(function (key) {
+    var txns = byTrip[key];
+    var trip = key === 'general' ? null : Catetin.state.trips.find(function (tr) { return tr.id === key; });
+    return {
+      key: key,
+      name: trip ? trip.name : 'General',
+      icon: trip ? trip.icon : '📁',
+      txns: txns,
+      amount: txns.reduce(function (s, t) { return s + Number(t.amount); }, 0)
+    };
+  }).sort(function (a, b) { return b.amount - a.amount; });
+
+  var container = document.getElementById('recap-event-list');
+  if (entries.length === 0) { container.innerHTML = '<div class="empty-state">No expenses this month</div>'; return; }
+
+  container.innerHTML = entries.map(function (e, i) {
+    var pct = total > 0 ? Math.round(e.amount / total * 100) : 0;
+    var isOpen = Catetin.recap.openEvent === e.key;
+    return '<div class="txn recap-cat-row' + (isOpen ? ' open' : '') + '" data-recap-event="' + e.key + '">'
+      + '<div class="icon-chip" style="background:var(--surface-2);">' + e.icon + '</div>'
+      + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(e.name) + '</div><div class="sub">' + e.txns.length + ' transaction' + (e.txns.length > 1 ? 's' : '') + ' · ' + pct + '%</div></div>'
+      + '<div class="amt mono" style="color:var(--coral-ink);">' + Catetin.fmtRp(e.amount) + '</div>'
+      + '<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>'
+      + '<div class="recap-cat-txns" id="recap-event-txns-' + i + '"' + (isOpen ? '' : ' hidden') + '></div>'
+      + (i === entries.length - 1 ? '' : '<hr class="divider"/>');
+  }).join('');
+
+  container.querySelectorAll('[data-recap-event]').forEach(function (row, i) {
+    if (Catetin.recap.openEvent === row.dataset.recapEvent) {
+      Catetin.renderTxnGroups('recap-event-txns-' + i, entries[i].txns, Catetin.renderRecap, { grouped: false });
+    }
+    row.addEventListener('click', function () {
+      var key = row.dataset.recapEvent;
+      Catetin.recap.openEvent = (Catetin.recap.openEvent === key) ? null : key;
+      Catetin.recap.renderEventList(expenseTx, total);
     });
   });
 };
