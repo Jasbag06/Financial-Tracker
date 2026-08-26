@@ -3,6 +3,7 @@ window.Catetin = window.Catetin || {};
 Catetin.scan = { ocrText: '', confidence: 0, items: [] };
 
 Catetin.router.onEnter.scan = function () {
+  Catetin.scan.photoFile = null;
   document.getElementById('scan-caption').textContent = 'Point camera at receipt';
 };
 
@@ -24,6 +25,7 @@ document.getElementById('btn-scan-from-dashboard').addEventListener('click', fun
 });
 
 Catetin.scan.process = async function (file) {
+  Catetin.scan.photoFile = file;
   var progressEl = document.getElementById('scan-progress');
   progressEl.hidden = false;
   progressEl.textContent = 'Reading receipt... 0%';
@@ -151,7 +153,12 @@ document.getElementById('btn-scan-save').addEventListener('click', async functio
   if (!Catetin.state.accounts.length) { Catetin.toast('Add a bank account first in Settings'); return; }
   var merchant = document.getElementById('scan-merchant').value.trim();
   var btn = this; btn.disabled = true;
+
+  var txnId = crypto.randomUUID();
+  var receiptPath = Catetin.scan.photoFile ? await Catetin.uploadReceipt(Catetin.scan.photoFile, txnId) : null;
+
   var { error } = await Catetin.supabase.from('transactions').insert({
+    id: txnId,
     user_id: Catetin.state.user.id,
     occurred_at: document.getElementById('scan-date').value || new Date().toISOString().slice(0, 10),
     type: 'expense',
@@ -160,7 +167,8 @@ document.getElementById('btn-scan-save').addEventListener('click', async functio
     payment_source: document.getElementById('scan-account').value,
     note: merchant || null,
     is_recurring: false,
-    trip_id: document.getElementById('scan-trip').value || null
+    trip_id: document.getElementById('scan-trip').value || null,
+    receipt_url: receiptPath
   });
   btn.disabled = false;
   if (error) { Catetin.toast('Failed to save'); return; }

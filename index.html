@@ -118,6 +118,19 @@
           <div class="field"><label for="txn-note">Note (optional)</label><input type="text" id="txn-note" placeholder="e.g. Lunch"></div>
 
           <div class="field">
+            <label>Receipt Photo (optional)</label>
+            <div class="receipt-attach" id="txn-receipt-empty">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Add Photo</span>
+            </div>
+            <div class="receipt-preview" id="txn-receipt-preview" hidden>
+              <img id="txn-receipt-img" alt="Receipt preview">
+              <button type="button" class="receipt-remove-btn" id="btn-txn-receipt-remove">&times;</button>
+            </div>
+            <input type="file" accept="image/*" id="txn-receipt-input" hidden>
+          </div>
+
+          <div class="field">
             <label>Repeat Automatically</label>
             <div class="chip-row" id="recurring-row">
               <button type="button" class="chip active" data-recurring="false">No</button>
@@ -487,6 +500,7 @@
 <script src="js/router.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/trips.js"></script>
+<script src="js/receipts.js"></script>
 <script src="js/quickadd.js"></script>
 <script src="js/history.js"></script>
 <script src="js/budget.js"></script>

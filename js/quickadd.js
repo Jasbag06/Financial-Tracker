@@ -1,6 +1,15 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.quickadd = { step: 0, type: 'expense', amountStr: '0', category: null, account: null, recurring: false, tripId: null };
+Catetin.quickadd = { step: 0, type: 'expense', amountStr: '0', category: null, account: null, recurring: false, tripId: null, receiptFile: null };
+
+Catetin.quickadd.receiptPicker = Catetin.setupReceiptPicker({
+  emptyEl: document.getElementById('txn-receipt-empty'),
+  previewEl: document.getElementById('txn-receipt-preview'),
+  imgEl: document.getElementById('txn-receipt-img'),
+  inputEl: document.getElementById('txn-receipt-input'),
+  removeBtn: document.getElementById('btn-txn-receipt-remove'),
+  onChange: function (file) { Catetin.quickadd.receiptFile = file; }
+});
 
 Catetin.router.onEnter.catat = function () { Catetin.quickadd.reset(); };
 
@@ -12,6 +21,9 @@ Catetin.quickadd.reset = function () {
   qa.account = null;
   qa.recurring = false;
   qa.tripId = null;
+  qa.receiptFile = null;
+  Catetin.quickadd.receiptPicker.showEmpty();
+  document.getElementById('txn-receipt-input').value = '';
 
   document.getElementById('amount-display').textContent = '0';
   document.querySelectorAll('#type-toggle .opt').forEach(function (b) {
@@ -195,7 +207,12 @@ document.getElementById('btn-save-txn').addEventListener('click', async function
   var qa = Catetin.quickadd;
   if (!qa.category || !qa.account || Number(qa.amountStr) <= 0) { Catetin.toast('Please fill in all fields'); return; }
   var btn = this; btn.disabled = true;
+
+  var txnId = crypto.randomUUID();
+  var receiptPath = qa.receiptFile ? await Catetin.uploadReceipt(qa.receiptFile, txnId) : null;
+
   var { error } = await Catetin.supabase.from('transactions').insert({
+    id: txnId,
     user_id: Catetin.state.user.id,
     occurred_at: document.getElementById('txn-date').value || new Date().toISOString().slice(0, 10),
     type: qa.type,
@@ -204,7 +221,8 @@ document.getElementById('btn-save-txn').addEventListener('click', async function
     payment_source: qa.account,
     note: document.getElementById('txn-note').value.trim() || null,
     is_recurring: qa.recurring,
-    trip_id: qa.tripId || null
+    trip_id: qa.tripId || null,
+    receipt_url: receiptPath
   });
   btn.disabled = false;
   if (error) { Catetin.toast('Failed to save'); return; }

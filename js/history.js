@@ -117,9 +117,11 @@ Catetin.renderTxnGroups = function (containerId, list, onChange, opts) {
     var subParts = [Catetin.escapeHtml(t.payment_source)];
     if (!grouped) subParts.push(Catetin.fmtDateShort(t.occurred_at));
     if (t.note) subParts.push(Catetin.escapeHtml(t.note));
+    var receiptBtn = t.receipt_url ? '<button type="button" class="receipt-badge" data-receipt="' + Catetin.escapeHtml(t.receipt_url) + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>' : '';
     return '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Delete</button></div>'
       + '<div class="txn" data-swipe-toggle><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
       + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + (trip ? ' · ' + trip.icon + ' ' + Catetin.escapeHtml(trip.name) : '') + '</div><div class="sub">' + subParts.join(' · ') + '</div></div>'
+      + receiptBtn
       + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div></div>'
       + (isLast ? '' : '<hr class="divider"/>');
   }
@@ -147,6 +149,12 @@ Catetin.renderTxnGroups = function (containerId, list, onChange, opts) {
 
   container.querySelectorAll('[data-swipe-toggle]').forEach(function (row) {
     row.addEventListener('click', function () { row.classList.toggle('swiped'); });
+  });
+  container.querySelectorAll('[data-receipt]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      Catetin.showReceiptModal(btn.dataset.receipt);
+    });
   });
   container.querySelectorAll('[data-del]').forEach(function (btn) {
     btn.addEventListener('click', async function (e) {

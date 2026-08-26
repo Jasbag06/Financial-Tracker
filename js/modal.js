@@ -253,12 +253,52 @@ Catetin.modal.editTransaction = function (t) {
       + '<input type="date" id="modal-date" class="modal-input" value="' + t.occurred_at + '">'
       + '<select id="modal-trip" class="modal-input">' + tripOptions + '</select>'
       + '<input type="text" id="modal-note" class="modal-input" value="' + Catetin.escapeHtml(t.note || '') + '" placeholder="Note (optional)">'
+      + '<div class="field" style="margin-bottom:16px;">'
+      + '<label style="display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">Receipt Photo (optional)</label>'
+      + '<div class="receipt-attach" id="modal-receipt-empty"' + (t.receipt_url ? ' hidden' : '') + '>'
+      + '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>'
+      + '<span>Add Photo</span></div>'
+      + '<div class="receipt-preview" id="modal-receipt-preview"' + (t.receipt_url ? '' : ' hidden') + '>'
+      + '<img id="modal-receipt-img" alt="Receipt preview">'
+      + '<button type="button" class="receipt-remove-btn" id="modal-receipt-remove">&times;</button>'
+      + '</div>'
+      + '<input type="file" accept="image/*" id="modal-receipt-input" hidden>'
+      + '</div>'
       + '<div class="modal-actions">'
       + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
       + '<button type="button" class="cta" id="modal-ok">Save</button>'
       + '</div>',
       function () { resolve(null); }
     );
+
+    var receiptFile = null;
+    var receiptRemoved = false;
+    var receiptEmptyEl = sheet.querySelector('#modal-receipt-empty');
+    var receiptPreviewEl = sheet.querySelector('#modal-receipt-preview');
+    var receiptImgEl = sheet.querySelector('#modal-receipt-img');
+    var receiptInputEl = sheet.querySelector('#modal-receipt-input');
+
+    if (t.receipt_url) {
+      Catetin.getReceiptSignedUrl(t.receipt_url).then(function (url) { if (url) receiptImgEl.src = url; });
+    }
+
+    receiptEmptyEl.addEventListener('click', function () { receiptInputEl.click(); });
+    receiptInputEl.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      receiptFile = file;
+      receiptRemoved = false;
+      receiptImgEl.src = URL.createObjectURL(file);
+      receiptEmptyEl.hidden = true;
+      receiptPreviewEl.hidden = false;
+    });
+    sheet.querySelector('#modal-receipt-remove').addEventListener('click', function () {
+      receiptInputEl.value = '';
+      receiptFile = null;
+      receiptRemoved = true;
+      receiptEmptyEl.hidden = false;
+      receiptPreviewEl.hidden = true;
+    });
 
     var catSelect = sheet.querySelector('#modal-cat');
     sheet.querySelectorAll('#modal-txn-type .opt').forEach(function (btn) {
@@ -274,7 +314,8 @@ Catetin.modal.editTransaction = function (t) {
     var amtInput = sheet.querySelector('#modal-amt');
     setTimeout(function () { amtInput.focus(); }, 50);
     sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
-    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+    var okBtn = sheet.querySelector('#modal-ok');
+    okBtn.addEventListener('click', async function () {
       var amount = Number(amtInput.value);
       if (!amount || amount <= 0) { amtInput.focus(); return; }
       var category = catSelect.value;
@@ -283,8 +324,18 @@ Catetin.modal.editTransaction = function (t) {
       if (!category || !account || !date) { return; }
       var tripId = sheet.querySelector('#modal-trip').value || null;
       var note = sheet.querySelector('#modal-note').value.trim();
+
+      okBtn.disabled = true;
+      var receiptUrl = t.receipt_url || null;
+      if (receiptFile) {
+        receiptUrl = await Catetin.uploadReceipt(receiptFile, t.id);
+      } else if (receiptRemoved) {
+        if (t.receipt_url) await Catetin.deleteReceipt(t.receipt_url);
+        receiptUrl = null;
+      }
+
       Catetin.modal._hide();
-      resolve({ type: currentType, amount: amount, category: category, payment_source: account, occurred_at: date, trip_id: tripId, note: note || null });
+      resolve({ type: currentType, amount: amount, category: category, payment_source: account, occurred_at: date, trip_id: tripId, note: note || null, receipt_url: receiptUrl });
     });
   });
 };
