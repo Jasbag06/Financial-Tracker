@@ -85,7 +85,8 @@ insert into storage.buckets (id, name, public)
 values ('receipts', 'receipts', false)
 on conflict (id) do nothing;
 
-alter table storage.objects enable row level security;
+-- storage.objects already has RLS enabled by default on Supabase - the
+-- SQL Editor role isn't the table owner, so re-enabling it here would fail.
 
 -- ============ ROW LEVEL SECURITY ============
 alter table categories enable row level security;
