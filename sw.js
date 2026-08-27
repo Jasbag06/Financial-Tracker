@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catetin-shell-v23';
+const CACHE_NAME = 'catetin-shell-v24';
 const SHELL_FILES = [
   './',
   './index.html',

@@ -1,16 +1,22 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '' };
+Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '', search: '' };
 
 Catetin.router.onEnter.history = function () {
-  Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '' };
+  Catetin.history = { type: '', category: '', account: '', tripFilter: '', dateFrom: '', dateTo: '', search: '' };
   document.querySelectorAll('#history-type-toggle .opt').forEach(function (b) { b.classList.toggle('active', b.dataset.type === ''); });
   document.getElementById('history-filter-panel').hidden = true;
   document.getElementById('history-date-from').value = '';
   document.getElementById('history-date-to').value = '';
+  document.getElementById('history-search').value = '';
   Catetin.renderHistoryFilters();
   Catetin.renderHistory();
 };
+
+document.getElementById('history-search').addEventListener('input', function () {
+  Catetin.history.search = this.value.trim().toLowerCase();
+  Catetin.renderHistory();
+});
 
 Catetin.renderHistoryFilters = function () {
   var cats = Catetin.state.categories;
@@ -93,6 +99,10 @@ Catetin.renderHistory = function () {
     if (h.dateTo && t.occurred_at > h.dateTo) return false;
     if (h.tripFilter === 'general' && t.trip_id) return false;
     if (h.tripFilter && h.tripFilter !== 'general' && t.trip_id !== h.tripFilter) return false;
+    if (h.search) {
+      var haystack = [t.note, t.category, t.payment_source].filter(Boolean).join(' ').toLowerCase();
+      if (haystack.indexOf(h.search) === -1) return false;
+    }
     return true;
   });
   Catetin.renderTxnGroups('history-list', list, Catetin.renderHistory);
