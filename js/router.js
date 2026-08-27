@@ -1,6 +1,6 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.VIEWS = ['auth', 'dashboard', 'catat', 'history', 'budget', 'settings',
+Catetin.VIEWS = ['auth', 'dashboard', 'catat', 'history', 'budget', 'budget-detail', 'settings',
   'manage-categories', 'manage-accounts', 'add-account', 'install-guide', 'scan', 'scan-result',
   'trips', 'add-trip', 'trip-detail', 'recap'];
 Catetin.NAV_VIEWS = ['dashboard', 'history', 'budget', 'settings'];
@@ -45,5 +45,6 @@ document.addEventListener('click', function (e) {
   var btn = e.target.closest('[data-nav]');
   if (!btn) return;
   if (btn.dataset.tripId) Catetin.currentTripId = btn.dataset.tripId;
+  if (btn.dataset.budgetScope !== undefined) Catetin.currentBudgetScope = btn.dataset.budgetScope || null;
   Catetin.router.go(btn.getAttribute('data-nav'));
 });

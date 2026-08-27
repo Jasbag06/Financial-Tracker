@@ -43,7 +43,7 @@ Catetin.renderManageCategories = function () {
   if (cats.length === 0) { el.innerHTML = '<div class="empty-state">No categories yet</div>'; return; }
   el.innerHTML = cats.map(function (c) {
     return '<div class="setting-row" style="cursor:default;"><div class="icon-chip" style="background:var(--surface-2);">' + c.icon + '</div>'
-      + '<div class="label">' + Catetin.escapeHtml(c.name) + (c.budget_monthly ? '<div class="muted" style="font-size:11px;font-weight:400;">Budget ' + Catetin.fmtRp(c.budget_monthly) + '</div>' : '') + '</div>'
+      + '<div class="label">' + Catetin.escapeHtml(c.name) + '</div>'
       + '<button type="button" class="link" data-edit-cat="' + c.id + '" style="margin-right:12px;">Edit</button>'
       + '<button type="button" class="link" data-del-cat="' + c.id + '" style="color:var(--coral-ink);">Delete</button></div>';
   }).join('');
@@ -54,7 +54,7 @@ Catetin.renderManageCategories = function () {
       var result = await Catetin.modal.editCategory(cat);
       if (!result) return;
       var { error } = await Catetin.supabase.from('categories').update({
-        name: result.name, icon: result.icon, budget_monthly: result.budget_monthly
+        name: result.name, icon: result.icon
       }).eq('id', cat.id);
       if (error) { Catetin.toast('Failed to update category'); return; }
       await Catetin.reloadAll();
@@ -79,11 +79,9 @@ Catetin.renderManageCategories = function () {
 document.getElementById('add-category-form').addEventListener('submit', async function (e) {
   e.preventDefault();
   var name = document.getElementById('new-cat-name').value.trim();
-  var budget = document.getElementById('new-cat-budget').value;
   var sameType = Catetin.state.categories.filter(function (c) { return c.type === Catetin.manageCatType; });
   var { error } = await Catetin.supabase.from('categories').insert({
     user_id: Catetin.state.user.id, name: name, type: Catetin.manageCatType, icon: Catetin.newCatIcon,
-    budget_monthly: budget ? Number(budget) : null,
     sort_order: sameType.length + 1
   });
   if (error) { Catetin.toast('Failed to add category'); return; }

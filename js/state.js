@@ -6,6 +6,7 @@ Catetin.state = {
   accounts: [],
   transactions: [],
   trips: [],
+  budgets: [],
   theme: localStorage.getItem('catetin_theme') || 'light',
   notif: localStorage.getItem('catetin_notif') !== 'false'
 };
@@ -54,12 +55,13 @@ Catetin.tripDateRangeLabel = function (trip) {
 
 Catetin.reloadAll = async function () {
   var uid = Catetin.state.user.id;
-  var [catsRes, acctsRes, txnsRes, tripsRes] = await Promise.all([
+  var [catsRes, acctsRes, txnsRes, tripsRes, budgetsRes] = await Promise.all([
     Catetin.supabase.from('categories').select('*').eq('user_id', uid).order('sort_order'),
     Catetin.supabase.from('payment_sources').select('*').eq('user_id', uid).order('sort_order'),
     Catetin.supabase.from('transactions').select('*').eq('user_id', uid)
       .order('occurred_at', { ascending: false }).order('created_at', { ascending: false }),
-    Catetin.supabase.from('trips').select('*').eq('user_id', uid).order('start_date', { ascending: false })
+    Catetin.supabase.from('trips').select('*').eq('user_id', uid).order('start_date', { ascending: false }),
+    Catetin.supabase.from('budgets').select('*').eq('user_id', uid)
   ]);
   Catetin.state.categories = catsRes.data || [];
   // Cash always sorts last, however many other banks/wallets get added later.
@@ -71,4 +73,28 @@ Catetin.reloadAll = async function () {
   });
   Catetin.state.transactions = txnsRes.data || [];
   Catetin.state.trips = tripsRes.data || [];
+  Catetin.state.budgets = budgetsRes.data || [];
+};
+
+// Budgets are scoped Event-first, then Category: trip_id === null is the
+// "General" bucket (day-to-day spending not tagged to an event).
+Catetin.findBudget = function (tripId, category) {
+  tripId = tripId || null;
+  return Catetin.state.budgets.find(function (b) { return (b.trip_id || null) === tripId && b.category === category; }) || null;
+};
+
+// General budgets reset every month (like the old per-category budget did);
+// event budgets cover the whole event, so they sum every matching expense
+// regardless of date.
+Catetin.budgetSpent = function (tripId, category) {
+  tripId = tripId || null;
+  var thisMonth = new Date().toISOString().slice(0, 7);
+  return Catetin.state.transactions
+    .filter(function (t) {
+      if (t.type !== 'expense' || t.category !== category) return false;
+      if ((t.trip_id || null) !== tripId) return false;
+      if (!tripId) return t.occurred_at.slice(0, 7) === thisMonth;
+      return true;
+    })
+    .reduce(function (s, t) { return s + Number(t.amount); }, 0);
 };

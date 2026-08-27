@@ -24,6 +24,7 @@ Catetin.quickadd.reset = function () {
   qa.receiptFile = null;
   Catetin.quickadd.receiptPicker.showEmpty();
   document.getElementById('txn-receipt-input').value = '';
+  document.getElementById('txn-budget-hint').hidden = true;
 
   document.getElementById('amount-display').textContent = '0';
   document.querySelectorAll('#type-toggle .opt').forEach(function (b) {
@@ -121,6 +122,7 @@ Catetin.quickadd.renderCategoryGrid = function () {
       Catetin.quickadd.updateCatReminder();
       Catetin.quickadd.renderAccountChips();
       Catetin.quickadd.renderTripChips();
+      Catetin.quickadd.updateBudgetHint();
       setTimeout(function () { Catetin.quickadd.goStep(2); }, 220);
     });
   });
@@ -177,11 +179,13 @@ Catetin.quickadd.renderTripChips = function () {
         var newChip = row.querySelector('[data-trip-id="' + data.id + '"]');
         row.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
         if (newChip) newChip.classList.add('active');
+        Catetin.quickadd.updateBudgetHint();
         return;
       }
       row.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
       chip.classList.add('active');
       Catetin.quickadd.tripId = chip.dataset.tripId || null;
+      Catetin.quickadd.updateBudgetHint();
     });
   });
 };
@@ -200,6 +204,31 @@ Catetin.quickadd.updateCatReminder = function () {
   if (Catetin.quickadd.category) {
     var cat = Catetin.state.categories.find(function (c) { return c.name === Catetin.quickadd.category; });
     document.getElementById('pay-reminder').innerHTML = (cat ? cat.icon : '') + ' ' + amt + ' · ' + Catetin.escapeHtml(Catetin.quickadd.category);
+  }
+};
+
+// Reminder pill on the Pay From step: once both category and event are
+// known (event can change right there via the chip row), show how much of
+// that scope's budget for this category is left after this transaction.
+Catetin.quickadd.updateBudgetHint = function () {
+  var qa = Catetin.quickadd;
+  var hintEl = document.getElementById('txn-budget-hint');
+  if (qa.type !== 'expense' || !qa.category) { hintEl.hidden = true; return; }
+
+  var budget = Catetin.findBudget(qa.tripId, qa.category);
+  if (!budget) { hintEl.hidden = true; return; }
+
+  var spentSoFar = Catetin.budgetSpent(qa.tripId, qa.category);
+  var afterThis = spentSoFar + Number(qa.amountStr);
+  var remaining = Number(budget.amount) - afterThis;
+  var trip = qa.tripId ? Catetin.state.trips.find(function (tr) { return tr.id === qa.tripId; }) : null;
+  var scopeName = trip ? trip.name : 'this month';
+
+  hintEl.hidden = false;
+  if (remaining < 0) {
+    hintEl.innerHTML = '<span style="color:var(--coral-ink);">⚠️</span> Over ' + Catetin.escapeHtml(qa.category) + ' budget (' + Catetin.escapeHtml(scopeName) + ') by ' + Catetin.fmtRp(Math.abs(remaining));
+  } else {
+    hintEl.innerHTML = Catetin.fmtRp(remaining) + ' left of ' + Catetin.escapeHtml(qa.category) + ' budget (' + Catetin.escapeHtml(scopeName) + ') after this';
   }
 };
 

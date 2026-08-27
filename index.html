@@ -113,6 +113,8 @@
             <div class="chip-row" id="txn-trip-row"></div>
           </div>
 
+          <span class="reminder-pill" id="txn-budget-hint" hidden style="margin-bottom:14px;"></span>
+
           <div class="field"><label for="txn-date">Date</label><input type="date" id="txn-date"></div>
 
           <div class="field"><label for="txn-note">Note (optional)</label><input type="text" id="txn-note" placeholder="e.g. Lunch"></div>
@@ -186,8 +188,23 @@
       <h1>Budget</h1>
       <button class="icon-btn" data-nav="recap" title="Monthly Recap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></button>
     </div>
-    <div class="muted" style="font-size:12px;margin:-10px 0 16px;" id="budget-month-label"></div>
-    <div id="budget-list"></div>
+    <p class="muted" style="font-size:13px;margin:-8px 0 18px;">Set a budget for an event, or for everyday "General" spending — then pick which categories inside it have a limit.</p>
+    <div id="budget-scope-list"></div>
+  </section>
+
+  <!-- ============ BUDGET DETAIL (per Event/General) ============ -->
+  <section id="view-budget-detail" class="view" hidden>
+    <div class="header-row">
+      <button class="icon-btn" data-nav="budget"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h1 id="budget-detail-name">Budget</h1>
+      <div style="width:36px;"></div>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:-10px 0 16px;" id="budget-detail-sub"></p>
+    <div id="budget-detail-list"></div>
+    <button type="button" class="cta" id="btn-budget-add" style="margin-top:18px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Add Category Budget
+    </button>
   </section>
 
   <!-- ============ MONTHLY RECAP ============ -->
@@ -401,7 +418,6 @@
         <label>Icon</label>
         <div class="icon-picker" id="new-cat-icon-picker"></div>
       </div>
-      <div class="field"><label for="new-cat-budget">Monthly Budget (optional)</label><input type="number" id="new-cat-budget" placeholder="e.g. 300000" min="0" step="1000"></div>
       <button type="submit" class="cta">Add</button>
     </form>
   </section>

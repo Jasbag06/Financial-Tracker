@@ -113,7 +113,6 @@ Catetin.modal.editCategory = function (cat) {
       + '<div class="icon-picker" id="modal-icon-picker">'
       + Catetin.ICON_CHOICES.map(function (ic) { return '<button type="button" data-icon="' + ic + '" class="' + (ic === selected ? 'active' : '') + '">' + ic + '</button>'; }).join('')
       + '</div>'
-      + '<input type="number" id="modal-cat-budget" class="modal-input" placeholder="Monthly budget (optional)" value="' + (cat.budget_monthly || '') + '" min="0" step="1000">'
       + '<div class="modal-actions">'
       + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
       + '<button type="button" class="cta" id="modal-ok">Save</button>'
@@ -133,9 +132,67 @@ Catetin.modal.editCategory = function (cat) {
     sheet.querySelector('#modal-ok').addEventListener('click', function () {
       var name = nameInput.value.trim();
       if (!name) { nameInput.focus(); return; }
-      var budgetVal = sheet.querySelector('#modal-cat-budget').value;
       Catetin.modal._hide();
-      resolve({ name: name, icon: selected, budget_monthly: budgetVal ? Number(budgetVal) : null });
+      resolve({ name: name, icon: selected });
+    });
+  });
+};
+
+// tripId null = General. `categories` is the list of expense categories not
+// yet budgeted in that scope (the "Add" flow only ever offers those).
+Catetin.modal.addBudget = function (categories) {
+  return new Promise(function (resolve) {
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Add Category Budget</p>'
+      + '<select id="modal-budget-cat" class="modal-input">' + categories.map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('') + '</select>'
+      + '<input type="number" id="modal-budget-amount" class="modal-input" placeholder="Amount" min="0" step="1000">'
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Add</button>'
+      + '</div>',
+      function () { resolve(null); }
+    );
+    var amtInput = sheet.querySelector('#modal-budget-amount');
+    setTimeout(function () { amtInput.focus(); }, 50);
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var amount = Number(amtInput.value);
+      if (!amount || amount <= 0) { amtInput.focus(); return; }
+      var category = sheet.querySelector('#modal-budget-cat').value;
+      Catetin.modal._hide();
+      resolve({ category: category, amount: amount });
+    });
+  });
+};
+
+// Resolves {amount} on Save, the string 'delete' if the user removes the
+// budget, or null on cancel.
+Catetin.modal.editBudget = function (budget) {
+  return new Promise(function (resolve) {
+    var cat = Catetin.state.categories.find(function (c) { return c.name === budget.category; });
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Edit Budget</p>'
+      + '<div class="row" style="margin-bottom:16px;"><div class="icon-chip" style="background:var(--surface-2);">' + (cat ? cat.icon : '💸') + '</div><span style="font-weight:700;font-size:14.5px;">' + Catetin.escapeHtml(budget.category) + '</span></div>'
+      + '<input type="number" id="modal-budget-amount" class="modal-input" value="' + Number(budget.amount) + '" placeholder="Amount" min="0" step="1000">'
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
+      + '</div>'
+      + '<button type="button" class="link" id="modal-budget-remove" style="color:var(--coral-ink);width:100%;text-align:center;margin-top:16px;">Remove Budget</button>',
+      function () { resolve(null); }
+    );
+    var amtInput = sheet.querySelector('#modal-budget-amount');
+    setTimeout(function () { amtInput.focus(); }, 50);
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var amount = Number(amtInput.value);
+      if (!amount || amount <= 0) { amtInput.focus(); return; }
+      Catetin.modal._hide();
+      resolve({ amount: amount });
+    });
+    sheet.querySelector('#modal-budget-remove').addEventListener('click', function () {
+      Catetin.modal._hide();
+      resolve('delete');
     });
   });
 };
