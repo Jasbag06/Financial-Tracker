@@ -218,9 +218,12 @@ document.getElementById('add-debt-form').addEventListener('submit', async functi
 Catetin.router.onEnter['debt-detail'] = function () { Catetin.renderDebtDetail(); };
 
 Catetin.renderDebtDetail = function () {
-  var name = Catetin.currentDebtPerson;
-  var person = Catetin.debtPeople(Catetin.debts.direction).find(function (p) { return p.name === name; });
+  var name = String(Catetin.currentDebtPerson || '').toLowerCase();
+  // Case-insensitive: debtPeople groups that way, so a rename that differs
+  // only in casing still resolves to the right group.
+  var person = Catetin.debtPeople(Catetin.debts.direction).find(function (p) { return p.name.toLowerCase() === name; });
   if (!person) { Catetin.router.go('debts'); return; }
+  Catetin.currentDebtPerson = person.name;
 
   var incoming = Catetin.debts.direction === 'owed_to_me';
   var settled = person.outstanding <= 0;
@@ -265,7 +268,9 @@ Catetin.renderDebtDetail = function () {
       + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">' + (d.note ? Catetin.escapeHtml(d.note) : 'No note') + '</div>'
       + '<div class="muted" style="font-size:11.5px;margin-top:2px;">' + Catetin.fmtDateShort(d.occurred_at) + (d.payment_source ? ' · ' + Catetin.escapeHtml(d.payment_source) : '')
       + (d.transaction_id ? ' · from a recorded ' + (incoming ? 'expense' : 'income') : '') + '</div></div>'
-      + '<button type="button" class="link" data-debt-del="' + d.id + '" style="color:var(--coral-ink);flex:none;">Delete</button></div>';
+      + '<div class="row" style="gap:12px;flex:none;">'
+      + '<button type="button" class="link" data-debt-edit="' + d.id + '">Edit</button>'
+      + '<button type="button" class="link" data-debt-del="' + d.id + '" style="color:var(--coral-ink);">Delete</button></div></div>';
 
     if (!isSettled) {
       html += '<div class="mono" style="font-size:19px;font-weight:700;margin-top:10px;color:var(--coral-ink);">' + Catetin.fmtRp(remaining) + '</div>';
@@ -301,6 +306,10 @@ Catetin.bindDebtDetailActions = function () {
     btn.addEventListener('click', function () { Catetin.recordDebtPayment(btn.dataset.debtPay); });
   });
 
+  container.querySelectorAll('[data-debt-edit]').forEach(function (btn) {
+    btn.addEventListener('click', function () { Catetin.editDebt(btn.dataset.debtEdit); });
+  });
+
   container.querySelectorAll('[data-debt-del]').forEach(function (btn) {
     btn.addEventListener('click', function () { Catetin.deleteDebt(btn.dataset.debtDel); });
   });
@@ -308,6 +317,24 @@ Catetin.bindDebtDetailActions = function () {
   container.querySelectorAll('[data-pay-del]').forEach(function (btn) {
     btn.addEventListener('click', function () { Catetin.deleteDebtPayment(btn.dataset.payDel); });
   });
+};
+
+Catetin.editDebt = async function (debtId) {
+  var debt = Catetin.state.debts.find(function (d) { return d.id === debtId; });
+  if (!debt) return;
+
+  var result = await Catetin.modal.editDebt(debt, Catetin.debtPaid(debtId));
+  if (!result) return;
+
+  var { error } = await Catetin.supabase.from('debts').update(result).eq('id', debtId);
+  if (error) { Catetin.toast('Failed to update'); return; }
+
+  // Renaming moves the debt to a different person group, so follow it rather
+  // than bouncing the user back to a page for a name that no longer exists.
+  Catetin.currentDebtPerson = result.person_name;
+  await Catetin.reloadAll();
+  Catetin.renderDebtDetail();
+  Catetin.toast('Debt updated');
 };
 
 Catetin.recordDebtPayment = async function (debtId) {
@@ -411,7 +438,8 @@ Catetin.deleteDebt = async function (debtId) {
   await Catetin.reloadAll();
   Catetin.toast('Debt deleted');
 
-  var stillThere = Catetin.debtPeople(Catetin.debts.direction).some(function (p) { return p.name === Catetin.currentDebtPerson; });
+  var current = String(Catetin.currentDebtPerson || '').toLowerCase();
+  var stillThere = Catetin.debtPeople(Catetin.debts.direction).some(function (p) { return p.name.toLowerCase() === current; });
   if (stillThere) Catetin.renderDebtDetail();
   else Catetin.router.go('debts');
 };

@@ -288,6 +288,69 @@ Catetin.modal.editTrip = function (trip) {
   });
 };
 
+// `paidSoFar` is passed in so the amount can't be edited down below what has
+// already been repaid, which would leave the debt permanently over-settled.
+Catetin.modal.editDebt = function (debt, paidSoFar) {
+  return new Promise(function (resolve) {
+    var acctOptions = '<option value="">No account</option>' + Catetin.state.accounts.map(function (a) {
+      return '<option value="' + Catetin.escapeHtml(a.name) + '"' + (a.name === debt.payment_source ? ' selected' : '') + '>' + Catetin.escapeHtml(a.name) + '</option>';
+    }).join('');
+
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Edit Debt</p>'
+      + '<label class="modal-label" for="modal-debt-person">Who</label>'
+      + '<input type="text" id="modal-debt-person" class="modal-input" value="' + Catetin.escapeHtml(debt.person_name) + '" autocomplete="off">'
+      + '<div class="chip-row" id="modal-debt-suggest" style="margin:-8px 0 16px;"></div>'
+      + '<label class="modal-label" for="modal-debt-amount">Amount</label>'
+      + '<input type="number" id="modal-debt-amount" class="modal-input" value="' + Number(debt.amount) + '" min="0" step="1000">'
+      + '<label class="modal-label" for="modal-debt-note">What for</label>'
+      + '<input type="text" id="modal-debt-note" class="modal-input" value="' + Catetin.escapeHtml(debt.note || '') + '" placeholder="Optional">'
+      + '<label class="modal-label" for="modal-debt-date">Date</label>'
+      + '<input type="date" id="modal-debt-date" class="modal-input" value="' + debt.occurred_at + '">'
+      + '<label class="modal-label" for="modal-debt-due">Due date</label>'
+      + '<input type="date" id="modal-debt-due" class="modal-input" value="' + (debt.due_date || '') + '">'
+      + '<label class="modal-label" for="modal-debt-acct">Account</label>'
+      + '<select id="modal-debt-acct" class="modal-input">' + acctOptions + '</select>'
+      + (debt.transaction_id ? '<p class="modal-msg" style="margin:-6px 0 16px;">This came from a recorded transaction. Editing here won\'t change that transaction — edit it in History.</p>' : '')
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta" id="modal-ok">Save</button>'
+      + '</div>',
+      function () { resolve(null); }
+    );
+
+    Catetin.renderDebtSuggestions('modal-debt-suggest', 'modal-debt-person', debt.person_name);
+    var nameInput = sheet.querySelector('#modal-debt-person');
+    nameInput.addEventListener('input', function () {
+      Catetin.renderDebtSuggestions('modal-debt-suggest', 'modal-debt-person', this.value);
+    });
+
+    var amtInput = sheet.querySelector('#modal-debt-amount');
+    setTimeout(function () { nameInput.focus(); }, 50);
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      var amount = Number(amtInput.value);
+      if (!amount || amount <= 0) { amtInput.focus(); return; }
+      if (amount < paidSoFar) {
+        Catetin.toast('Already repaid ' + Catetin.fmtRp(paidSoFar) + ' — amount can\'t be lower');
+        amtInput.focus();
+        return;
+      }
+      Catetin.modal._hide();
+      resolve({
+        person_name: name,
+        amount: amount,
+        note: sheet.querySelector('#modal-debt-note').value.trim() || null,
+        occurred_at: sheet.querySelector('#modal-debt-date').value || debt.occurred_at,
+        due_date: sheet.querySelector('#modal-debt-due').value || null,
+        payment_source: sheet.querySelector('#modal-debt-acct').value || null
+      });
+    });
+  });
+};
+
 // Records one instalment against a debt. When the user leaves "Also record as
 // income/expense" ticked, the caller writes a real transaction too - repayment
 // is actual money moving in or out of an account, unlike the debt itself.
