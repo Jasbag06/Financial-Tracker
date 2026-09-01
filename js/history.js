@@ -128,10 +128,14 @@ Catetin.renderTxnGroups = function (containerId, list, onChange, opts) {
     if (!grouped) subParts.push(Catetin.fmtDateShort(t.occurred_at));
     if (t.note) subParts.push(Catetin.escapeHtml(t.note));
     var receiptBtn = t.receipt_url ? '<button type="button" class="receipt-badge" data-receipt="' + Catetin.escapeHtml(t.receipt_url) + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg></button>' : '';
+    // Flags a transaction that also created a debt, so it doesn't read as an
+    // accidental double entry when scanning back through History.
+    var linkedDebt = (Catetin.state.debts || []).find(function (d) { return d.transaction_id === t.id; });
+    var debtBadge = linkedDebt ? '<span class="receipt-badge" title="Also tracked as a debt" style="cursor:default;">🤝</span>' : '';
     return '<div class="txn-swipe-wrap"><div class="txn-actions"><button class="act-edit" data-edit="' + t.id + '">Edit</button><button class="act-del" data-del="' + t.id + '">Delete</button></div>'
       + '<div class="txn" data-swipe-toggle><div class="icon-chip" style="background:var(--surface-2);">' + icon + '</div>'
       + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(t.category) + (trip ? ' · ' + trip.icon + ' ' + Catetin.escapeHtml(trip.name) : '') + '</div><div class="sub">' + subParts.join(' · ') + '</div></div>'
-      + receiptBtn
+      + debtBadge + receiptBtn
       + '<div class="amt mono" style="color:' + color + ';">' + sign + Catetin.fmtShort(t.amount) + '</div></div></div>'
       + (isLast ? '' : '<hr class="divider"/>');
   }

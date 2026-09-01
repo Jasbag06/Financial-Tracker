@@ -97,6 +97,10 @@ create table if not exists debts (
   occurred_at date not null default current_date,
   due_date date,
   payment_source text,
+  -- Set when the debt was created straight from the Add flow ("I paid for
+  -- this, they owe me back"): the transaction is the real money movement,
+  -- the debt is the promise attached to it.
+  transaction_id uuid references transactions(id) on delete set null,
   created_at timestamptz not null default now()
 );
 

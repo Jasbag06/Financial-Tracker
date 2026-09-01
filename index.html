@@ -136,6 +136,21 @@
           </div>
 
           <div class="field">
+            <label>Mark as Debt</label>
+            <div class="chip-row" id="txn-debt-row">
+              <button type="button" class="chip active" data-debt="false">No</button>
+              <button type="button" class="chip" data-debt="true">Yes</button>
+            </div>
+          </div>
+
+          <div class="field" id="txn-debt-person-field" hidden>
+            <label for="txn-debt-person" id="txn-debt-person-label">Who owes you back</label>
+            <input type="text" id="txn-debt-person" placeholder="e.g. Andre" autocomplete="off">
+            <div class="chip-row" id="txn-debt-suggest" style="margin-top:8px;"></div>
+            <div class="hint" id="txn-debt-hint">Recorded as a debt too, so you can track it until they pay you back.</div>
+          </div>
+
+          <div class="field">
             <label>Repeat Automatically</label>
             <div class="chip-row" id="recurring-row">
               <button type="button" class="chip active" data-recurring="false">No</button>

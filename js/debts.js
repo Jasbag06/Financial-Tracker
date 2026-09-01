@@ -136,7 +136,7 @@ Catetin.router.onEnter['add-debt'] = function () {
   document.getElementById('new-debt-date').value = new Date().toISOString().slice(0, 10);
   Catetin.debts.newAccount = null;
   Catetin.renderDebtAccountChips();
-  Catetin.renderDebtSuggestions('');
+  Catetin.renderDebtSuggestions('debt-person-suggest', 'new-debt-person', '');
 };
 
 document.getElementById('new-debt-direction').addEventListener('click', function (e) {
@@ -164,8 +164,10 @@ Catetin.renderDebtAccountChips = function () {
 
 // Suggests people already on record as you type, so the same person always
 // lands under one name instead of "Budi" / "budi " / "Budi S" separately.
-Catetin.renderDebtSuggestions = function (query) {
-  var row = document.getElementById('debt-person-suggest');
+// Shared by the New Debt form and the "Mark as Debt" field in Add.
+Catetin.renderDebtSuggestions = function (rowId, inputId, query) {
+  var row = document.getElementById(rowId);
+  if (!row) return;
   var q = String(query || '').trim().toLowerCase();
   var names = Catetin.debtNames().filter(function (n) {
     return !q || (n.toLowerCase().indexOf(q) !== -1 && n.toLowerCase() !== q);
@@ -177,14 +179,14 @@ Catetin.renderDebtSuggestions = function (query) {
 
   row.querySelectorAll('[data-suggest-name]').forEach(function (chip) {
     chip.addEventListener('click', function () {
-      document.getElementById('new-debt-person').value = chip.dataset.suggestName;
-      Catetin.renderDebtSuggestions(chip.dataset.suggestName);
+      document.getElementById(inputId).value = chip.dataset.suggestName;
+      Catetin.renderDebtSuggestions(rowId, inputId, chip.dataset.suggestName);
     });
   });
 };
 
 document.getElementById('new-debt-person').addEventListener('input', function () {
-  Catetin.renderDebtSuggestions(this.value);
+  Catetin.renderDebtSuggestions('debt-person-suggest', 'new-debt-person', this.value);
 });
 
 document.getElementById('add-debt-form').addEventListener('submit', async function (e) {
@@ -261,7 +263,8 @@ Catetin.renderDebtDetail = function () {
     var html = '<div class="debt-card' + (isSettled ? ' settled' : '') + '">'
       + '<div class="between" style="align-items:flex-start;gap:10px;">'
       + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">' + (d.note ? Catetin.escapeHtml(d.note) : 'No note') + '</div>'
-      + '<div class="muted" style="font-size:11.5px;margin-top:2px;">' + Catetin.fmtDateShort(d.occurred_at) + (d.payment_source ? ' · ' + Catetin.escapeHtml(d.payment_source) : '') + '</div></div>'
+      + '<div class="muted" style="font-size:11.5px;margin-top:2px;">' + Catetin.fmtDateShort(d.occurred_at) + (d.payment_source ? ' · ' + Catetin.escapeHtml(d.payment_source) : '')
+      + (d.transaction_id ? ' · from a recorded ' + (incoming ? 'expense' : 'income') : '') + '</div></div>'
       + '<button type="button" class="link" data-debt-del="' + d.id + '" style="color:var(--coral-ink);flex:none;">Delete</button></div>';
 
     if (!isSettled) {
@@ -380,11 +383,18 @@ Catetin.deleteDebt = async function (debtId) {
   var payments = Catetin.debtPaymentsFor(debtId);
   var linked = payments.filter(function (p) { return p.transaction_id; });
 
+  var parts = [];
+  if (linked.length) {
+    parts.push('Its ' + payments.length + ' payment' + (payments.length > 1 ? 's' : '') + ' and the ' + linked.length + ' matching transaction' + (linked.length > 1 ? 's' : '') + ' will be deleted too.');
+  } else if (payments.length) {
+    parts.push('Its ' + payments.length + ' payment' + (payments.length > 1 ? 's' : '') + ' will be deleted too.');
+  }
+  // The originating expense/income stays: that money really did move.
+  if (debt.transaction_id) parts.push('The original transaction stays in your history.');
+
   var ok = await Catetin.modal.confirm({
     title: 'Delete this debt?',
-    message: linked.length
-      ? 'Its ' + payments.length + ' payment' + (payments.length > 1 ? 's' : '') + ' and the ' + linked.length + ' matching transaction' + (linked.length > 1 ? 's' : '') + ' will be deleted too.'
-      : '',
+    message: parts.join(' '),
     danger: true,
     confirmLabel: 'Delete'
   });

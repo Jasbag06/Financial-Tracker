@@ -1,6 +1,6 @@
 window.Catetin = window.Catetin || {};
 
-Catetin.quickadd = { step: 0, type: 'expense', amountStr: '0', category: null, account: null, recurring: false, tripId: null, receiptFile: null };
+Catetin.quickadd = { step: 0, type: 'expense', amountStr: '0', category: null, account: null, recurring: false, tripId: null, receiptFile: null, isDebt: false };
 
 Catetin.quickadd.receiptPicker = Catetin.setupReceiptPicker({
   emptyEl: document.getElementById('txn-receipt-empty'),
@@ -25,6 +25,11 @@ Catetin.quickadd.reset = function () {
   Catetin.quickadd.receiptPicker.showEmpty();
   document.getElementById('txn-receipt-input').value = '';
   document.getElementById('txn-budget-hint').hidden = true;
+
+  qa.isDebt = false;
+  document.querySelectorAll('#txn-debt-row .chip').forEach(function (c) { c.classList.toggle('active', c.dataset.debt === 'false'); });
+  document.getElementById('txn-debt-person-field').hidden = true;
+  document.getElementById('txn-debt-person').value = '';
 
   document.getElementById('amount-display').textContent = '0';
   document.querySelectorAll('#type-toggle .opt').forEach(function (b) {
@@ -79,6 +84,34 @@ document.getElementById('type-toggle').addEventListener('click', function (e) {
   btn.classList.add('active');
   btn.style.color = btn.dataset.type === 'expense' ? 'var(--coral-ink)' : 'var(--mint-ink)';
   Catetin.quickadd.renderCategoryGrid();
+  Catetin.quickadd.updateDebtLabels();
+});
+
+// An expense marked as a debt means "I fronted this, they owe me back";
+// an income marked as a debt means "I borrowed this, I owe it back".
+Catetin.quickadd.updateDebtLabels = function () {
+  var incoming = Catetin.quickadd.type === 'income';
+  document.getElementById('txn-debt-person-label').textContent = incoming ? 'Who you owe' : 'Who owes you back';
+  document.getElementById('txn-debt-person').placeholder = incoming ? 'e.g. Budi' : 'e.g. Andre';
+  document.getElementById('txn-debt-hint').textContent = incoming
+    ? 'Recorded as a debt too, so you can track it until you pay them back.'
+    : 'Recorded as a debt too, so you can track it until they pay you back.';
+};
+
+document.getElementById('txn-debt-row').addEventListener('click', function (e) {
+  var chip = e.target.closest('.chip'); if (!chip) return;
+  document.querySelectorAll('#txn-debt-row .chip').forEach(function (c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  Catetin.quickadd.isDebt = chip.dataset.debt === 'true';
+  document.getElementById('txn-debt-person-field').hidden = !Catetin.quickadd.isDebt;
+  if (Catetin.quickadd.isDebt) {
+    Catetin.quickadd.updateDebtLabels();
+    Catetin.renderDebtSuggestions('txn-debt-suggest', 'txn-debt-person', document.getElementById('txn-debt-person').value);
+  }
+});
+
+document.getElementById('txn-debt-person').addEventListener('input', function () {
+  Catetin.renderDebtSuggestions('txn-debt-suggest', 'txn-debt-person', this.value);
 });
 
 document.getElementById('keypad').addEventListener('click', function (e) {
@@ -235,6 +268,10 @@ Catetin.quickadd.updateBudgetHint = function () {
 document.getElementById('btn-save-txn').addEventListener('click', async function () {
   var qa = Catetin.quickadd;
   if (!qa.category || !qa.account || Number(qa.amountStr) <= 0) { Catetin.toast('Please fill in all fields'); return; }
+
+  var debtPerson = document.getElementById('txn-debt-person').value.trim();
+  if (qa.isDebt && !debtPerson) { Catetin.toast('Enter who this debt is with'); return; }
+
   var btn = this; btn.disabled = true;
 
   var txnId = crypto.randomUUID();
@@ -253,8 +290,24 @@ document.getElementById('btn-save-txn').addEventListener('click', async function
     trip_id: qa.tripId || null,
     receipt_url: receiptPath
   });
+  if (error) { btn.disabled = false; Catetin.toast('Failed to save'); return; }
+
+  if (qa.isDebt) {
+    var occurredAt = document.getElementById('txn-date').value || new Date().toISOString().slice(0, 10);
+    var debtRes = await Catetin.supabase.from('debts').insert({
+      user_id: Catetin.state.user.id,
+      person_name: debtPerson,
+      direction: qa.type === 'expense' ? 'owed_to_me' : 'i_owe',
+      amount: Number(qa.amountStr),
+      note: document.getElementById('txn-note').value.trim() || null,
+      occurred_at: occurredAt,
+      payment_source: qa.account,
+      transaction_id: txnId
+    });
+    if (debtRes.error) { btn.disabled = false; Catetin.toast('Saved, but the debt failed to record'); }
+  }
+
   btn.disabled = false;
-  if (error) { Catetin.toast('Failed to save'); return; }
   await Catetin.reloadAll();
   var toastEl = document.getElementById('catat-toast');
   toastEl.classList.add('show');
