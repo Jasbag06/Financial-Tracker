@@ -41,6 +41,7 @@ Catetin.renderDashboard = function () {
     Catetin.applyMaskState();
   });
 
+  Catetin.renderHomeDebts();
   Catetin.renderTripCardsOnDashboard();
   Catetin.renderDonut(monthTx.filter(function (t) { return t.type === 'expense'; }));
   Catetin.renderRecentTxns();

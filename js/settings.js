@@ -16,6 +16,8 @@ Catetin.renderSettings = function () {
 Catetin.updateSettingsCounts = function () {
   document.getElementById('category-count').textContent = Catetin.state.categories.length;
   document.getElementById('account-count').textContent = Catetin.state.accounts.length;
+  var unpaid = Catetin.debtPeople('owed_to_me').filter(function (p) { return p.outstanding > 0; }).length;
+  document.getElementById('debt-count').textContent = unpaid ? unpaid + ' unpaid' : 'None';
 };
 
 document.getElementById('settings-theme-toggle').addEventListener('click', function (e) {

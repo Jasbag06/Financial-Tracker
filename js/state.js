@@ -7,6 +7,8 @@ Catetin.state = {
   transactions: [],
   trips: [],
   budgets: [],
+  debts: [],
+  debtPayments: [],
   theme: localStorage.getItem('catetin_theme') || 'light',
   notif: localStorage.getItem('catetin_notif') !== 'false'
 };
@@ -55,13 +57,15 @@ Catetin.tripDateRangeLabel = function (trip) {
 
 Catetin.reloadAll = async function () {
   var uid = Catetin.state.user.id;
-  var [catsRes, acctsRes, txnsRes, tripsRes, budgetsRes] = await Promise.all([
+  var [catsRes, acctsRes, txnsRes, tripsRes, budgetsRes, debtsRes, debtPaysRes] = await Promise.all([
     Catetin.supabase.from('categories').select('*').eq('user_id', uid).order('sort_order'),
     Catetin.supabase.from('payment_sources').select('*').eq('user_id', uid).order('sort_order'),
     Catetin.supabase.from('transactions').select('*').eq('user_id', uid)
       .order('occurred_at', { ascending: false }).order('created_at', { ascending: false }),
     Catetin.supabase.from('trips').select('*').eq('user_id', uid).order('start_date', { ascending: false }),
-    Catetin.supabase.from('budgets').select('*').eq('user_id', uid)
+    Catetin.supabase.from('budgets').select('*').eq('user_id', uid),
+    Catetin.supabase.from('debts').select('*').eq('user_id', uid).order('occurred_at', { ascending: false }),
+    Catetin.supabase.from('debt_payments').select('*').eq('user_id', uid).order('paid_at', { ascending: false })
   ]);
   Catetin.state.categories = catsRes.data || [];
   // Cash always sorts last, however many other banks/wallets get added later.
@@ -74,6 +78,99 @@ Catetin.reloadAll = async function () {
   Catetin.state.transactions = txnsRes.data || [];
   Catetin.state.trips = tripsRes.data || [];
   Catetin.state.budgets = budgetsRes.data || [];
+  Catetin.state.debts = debtsRes.data || [];
+  Catetin.state.debtPayments = debtPaysRes.data || [];
+};
+
+// ---- debts ----
+// "Settled" is always derived from the payments, never stored, so a debt and
+// its instalments can't drift out of sync.
+Catetin.debtPaymentsFor = function (debtId) {
+  return Catetin.state.debtPayments.filter(function (p) { return p.debt_id === debtId; });
+};
+
+Catetin.debtPaid = function (debtId) {
+  return Catetin.debtPaymentsFor(debtId).reduce(function (s, p) { return s + Number(p.amount); }, 0);
+};
+
+Catetin.debtRemaining = function (debt) {
+  return Math.max(0, Number(debt.amount) - Catetin.debtPaid(debt.id));
+};
+
+Catetin.debtIsSettled = function (debt) {
+  return Catetin.debtPaid(debt.id) >= Number(debt.amount);
+};
+
+Catetin.debtSettledDate = function (debt) {
+  var dates = Catetin.debtPaymentsFor(debt.id).map(function (p) { return p.paid_at; }).sort();
+  return dates.length ? dates[dates.length - 1] : null;
+};
+
+// Positive number of days past due, or 0 when not overdue / no due date /
+// already settled.
+Catetin.debtDaysOverdue = function (debt) {
+  if (!debt.due_date || Catetin.debtIsSettled(debt)) return 0;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var due = new Date(debt.due_date + 'T00:00:00');
+  var days = Math.floor((today - due) / 86400000);
+  return days > 0 ? days : 0;
+};
+
+Catetin.debtsByDirection = function (direction) {
+  return Catetin.state.debts.filter(function (d) { return d.direction === direction; });
+};
+
+Catetin.debtOutstandingTotal = function (direction) {
+  return Catetin.debtsByDirection(direction).reduce(function (s, d) { return s + Catetin.debtRemaining(d); }, 0);
+};
+
+// Groups a direction's debts by person so someone who borrowed three separate
+// times shows up once, with their total. Sorted by who owes the most, and
+// people who are fully settled sink to the bottom.
+Catetin.debtPeople = function (direction) {
+  var groups = {};
+  var order = [];
+  Catetin.debtsByDirection(direction).forEach(function (d) {
+    var key = d.person_name.trim().toLowerCase();
+    if (!groups[key]) { groups[key] = { name: d.person_name.trim(), debts: [] }; order.push(key); }
+    groups[key].debts.push(d);
+  });
+  return order.map(function (key) {
+    var g = groups[key];
+    var outstanding = g.debts.reduce(function (s, d) { return s + Catetin.debtRemaining(d); }, 0);
+    var total = g.debts.reduce(function (s, d) { return s + Number(d.amount); }, 0);
+    var overdue = g.debts.reduce(function (m, d) { return Math.max(m, Catetin.debtDaysOverdue(d)); }, 0);
+    return { name: g.name, debts: g.debts, outstanding: outstanding, total: total, overdue: overdue };
+  }).sort(function (a, b) {
+    if ((a.outstanding > 0) !== (b.outstanding > 0)) return b.outstanding - a.outstanding;
+    if (a.overdue !== b.overdue) return b.overdue - a.overdue;
+    return b.outstanding - a.outstanding;
+  });
+};
+
+Catetin.debtNames = function () {
+  var seen = {};
+  var names = [];
+  Catetin.state.debts.forEach(function (d) {
+    var key = d.person_name.trim().toLowerCase();
+    if (seen[key]) return;
+    seen[key] = true;
+    names.push(d.person_name.trim());
+  });
+  return names.sort(function (a, b) { return a.localeCompare(b); });
+};
+
+Catetin.debtInitials = function (name) {
+  var parts = String(name).trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+};
+
+Catetin.debtColor = function (name) {
+  var colors = ['coral', 'pink', 'lavender', 'yellow', 'mint'];
+  var sum = 0;
+  for (var i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+  return colors[sum % colors.length];
 };
 
 // Budgets are scoped Event-first, then Category: trip_id === null is the

@@ -288,6 +288,68 @@ Catetin.modal.editTrip = function (trip) {
   });
 };
 
+// Records one instalment against a debt. When the user leaves "Also record as
+// income/expense" ticked, the caller writes a real transaction too - repayment
+// is actual money moving in or out of an account, unlike the debt itself.
+Catetin.modal.recordPayment = function (debt, remaining) {
+  return new Promise(function (resolve) {
+    var incoming = debt.direction === 'owed_to_me';
+    var txnType = incoming ? 'income' : 'expense';
+    var cats = Catetin.state.categories.filter(function (c) { return c.type === txnType; });
+    var accounts = Catetin.state.accounts;
+    var canRecord = cats.length > 0 && accounts.length > 0;
+
+    var acctOptions = accounts.map(function (a) {
+      return '<option value="' + Catetin.escapeHtml(a.name) + '"' + (a.name === debt.payment_source ? ' selected' : '') + '>' + Catetin.escapeHtml(a.name) + '</option>';
+    }).join('');
+    var catOptions = cats.map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('');
+
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Record Payment</p>'
+      + '<p class="modal-msg">' + Catetin.escapeHtml(debt.person_name) + ' · ' + Catetin.fmtRp(remaining) + ' still ' + (incoming ? 'owed' : 'to pay') + '</p>'
+      + '<input type="number" id="modal-pay-amount" class="modal-input" value="' + remaining + '" min="0" step="1000" placeholder="Amount">'
+      + '<input type="date" id="modal-pay-date" class="modal-input" value="' + new Date().toISOString().slice(0, 10) + '">'
+      + (accounts.length ? '<select id="modal-pay-acct" class="modal-input">' + acctOptions + '</select>' : '')
+      + (canRecord
+        ? '<label class="modal-check" for="modal-pay-record"><input type="checkbox" id="modal-pay-record" checked>'
+          + '<span>Also record as ' + txnType + '<br><span class="muted" style="font-size:11px;font-weight:400;">Keeps your account balance accurate</span></span></label>'
+          + '<select id="modal-pay-cat" class="modal-input">' + catOptions + '</select>'
+        : '')
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta mint" id="modal-ok">Save</button>'
+      + '</div>',
+      function () { resolve(null); }
+    );
+
+    var amtInput = sheet.querySelector('#modal-pay-amount');
+    var recordBox = sheet.querySelector('#modal-pay-record');
+    var catSelect = sheet.querySelector('#modal-pay-cat');
+    if (recordBox && catSelect) {
+      var syncCat = function () { catSelect.hidden = !recordBox.checked; };
+      recordBox.addEventListener('change', syncCat);
+      syncCat();
+    }
+
+    setTimeout(function () { amtInput.focus(); }, 50);
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var amount = Number(amtInput.value);
+      if (!amount || amount <= 0) { amtInput.focus(); return; }
+      var acctEl = sheet.querySelector('#modal-pay-acct');
+      Catetin.modal._hide();
+      resolve({
+        amount: amount,
+        paid_at: sheet.querySelector('#modal-pay-date').value || new Date().toISOString().slice(0, 10),
+        payment_source: acctEl ? acctEl.value : null,
+        recordTransaction: !!(recordBox && recordBox.checked),
+        category: catSelect ? catSelect.value : null,
+        txnType: txnType
+      });
+    });
+  });
+};
+
 Catetin.modal.editTransaction = function (t) {
   return new Promise(function (resolve) {
     var currentType = t.type;
