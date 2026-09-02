@@ -48,5 +48,9 @@ document.addEventListener('click', function (e) {
   if (btn.dataset.tripId) Catetin.currentTripId = btn.dataset.tripId;
   if (btn.dataset.budgetScope !== undefined) Catetin.currentBudgetScope = btn.dataset.budgetScope || null;
   if (btn.dataset.debtPerson) Catetin.currentDebtPerson = btn.dataset.debtPerson;
+  // The Home card always lists people who owe you, so carry the direction
+  // along - otherwise the detail page would look the person up in whichever
+  // tab the Debts list happened to be left on.
+  if (btn.dataset.debtDirection) Catetin.debts.direction = btn.dataset.debtDirection;
   Catetin.router.go(btn.getAttribute('data-nav'));
 });

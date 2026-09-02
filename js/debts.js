@@ -31,18 +31,19 @@ Catetin.renderHomeDebts = function () {
     + '</div><hr class="divider" style="margin:11px 0 2px;"/>';
 
   top.forEach(function (p, i) {
-    html += Catetin.debtPersonRowHtml(p) + (i === top.length - 1 ? '' : '<hr class="divider"/>');
+    html += Catetin.debtPersonRowHtml(p, 'owed_to_me') + (i === top.length - 1 ? '' : '<hr class="divider"/>');
   });
 
   if (people.length > 3) {
     html += '<hr class="divider"/><button type="button" class="link" data-nav="debts" style="width:100%;text-align:center;padding:11px 0;">+ ' + (people.length - 3) + ' more</button>';
   }
   el.innerHTML = html + '</div>';
+  Catetin.bindSettleButtons(el);
 };
 
 // Shared by the home card and the Debts list - one row per person, since the
 // same person borrowing three times should read as one debtor, not three.
-Catetin.debtPersonRowHtml = function (p) {
+Catetin.debtPersonRowHtml = function (p, direction) {
   var settled = p.outstanding <= 0;
   var sub;
   if (settled) {
@@ -57,11 +58,27 @@ Catetin.debtPersonRowHtml = function (p) {
     else sub = p.debts[0].note ? Catetin.escapeHtml(p.debts[0].note) : Catetin.fmtDateShort(p.debts[0].occurred_at);
   }
 
-  return '<div class="txn" data-nav="debt-detail" data-debt-person="' + Catetin.escapeHtml(p.name) + '" style="cursor:pointer;">'
+  var settleBtn = settled ? '' : '<button type="button" class="debt-check" data-settle-person="' + Catetin.escapeHtml(p.name) + '" data-settle-direction="' + direction + '" title="Mark as fully paid">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></button>';
+
+  return '<div class="txn" style="cursor:pointer;">'
+    + '<div data-nav="debt-detail" data-debt-person="' + Catetin.escapeHtml(p.name) + '" data-debt-direction="' + direction + '" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">'
     + '<div class="debt-avatar" style="background:var(--' + Catetin.debtColor(p.name) + ');">' + Catetin.escapeHtml(Catetin.debtInitials(p.name)) + '</div>'
     + '<div class="meta"><div class="cat">' + Catetin.escapeHtml(p.name) + '</div><div class="sub">' + sub + '</div></div>'
     + '<div class="amt mono" style="color:' + (settled ? 'var(--mint-ink)' : 'var(--coral-ink)') + ';">'
-    + '<span class="real">' + Catetin.fmtRp(settled ? p.total : p.outstanding) + '</span><span class="masked">Rp •• •••</span></div></div>';
+    + '<span class="real">' + Catetin.fmtRp(settled ? p.total : p.outstanding) + '</span><span class="masked">Rp •• •••</span></div></div>'
+    + settleBtn + '</div>';
+};
+
+// The check button sits inside rows that are themselves a nav target, so its
+// click must not also open the detail page.
+Catetin.bindSettleButtons = function (container) {
+  container.querySelectorAll('[data-settle-person]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      Catetin.settlePerson(btn.dataset.settlePerson, btn.dataset.settleDirection);
+    });
+  });
 };
 
 // ------------------------------------------------------------- debts list
@@ -111,16 +128,18 @@ Catetin.renderDebts = function () {
   } else {
     if (unsettled.length) {
       html += '<div class="section-title">Unpaid</div><div class="card" style="padding:6px 16px;">';
-      unsettled.forEach(function (p, i) { html += Catetin.debtPersonRowHtml(p) + (i === unsettled.length - 1 ? '' : '<hr class="divider"/>'); });
+      unsettled.forEach(function (p, i) { html += Catetin.debtPersonRowHtml(p, dir) + (i === unsettled.length - 1 ? '' : '<hr class="divider"/>'); });
       html += '</div>';
     }
     if (settled.length) {
       html += '<div class="section-title">Settled</div><div class="card" style="padding:6px 16px;opacity:.62;">';
-      settled.forEach(function (p, i) { html += Catetin.debtPersonRowHtml(p) + (i === settled.length - 1 ? '' : '<hr class="divider"/>'); });
+      settled.forEach(function (p, i) { html += Catetin.debtPersonRowHtml(p, dir) + (i === settled.length - 1 ? '' : '<hr class="divider"/>'); });
       html += '</div>';
     }
   }
-  document.getElementById('debts-list').innerHTML = html;
+  var listEl = document.getElementById('debts-list');
+  listEl.innerHTML = html;
+  Catetin.bindSettleButtons(listEl);
   Catetin.applyMaskState();
 };
 
@@ -317,6 +336,62 @@ Catetin.bindDebtDetailActions = function () {
   container.querySelectorAll('[data-pay-del]').forEach(function (btn) {
     btn.addEventListener('click', function () { Catetin.deleteDebtPayment(btn.dataset.payDel); });
   });
+};
+
+// Settles every outstanding debt for one person in a single confirm. Each
+// debt gets its own payment (and its own transaction, when recording is on)
+// so the per-payment delete/unlink logic keeps working unchanged.
+Catetin.settlePerson = async function (personName, direction) {
+  var key = String(personName).toLowerCase();
+  var person = Catetin.debtPeople(direction).find(function (p) { return p.name.toLowerCase() === key; });
+  if (!person || person.outstanding <= 0) return;
+
+  var result = await Catetin.modal.settlePerson(person, direction);
+  if (!result) return;
+
+  var open = person.debts.filter(function (d) { return Catetin.debtRemaining(d) > 0; });
+  for (var i = 0; i < open.length; i++) {
+    var debt = open[i];
+    var remaining = Catetin.debtRemaining(debt);
+
+    var txnId = null;
+    if (result.recordTransaction && result.category && result.payment_source) {
+      txnId = crypto.randomUUID();
+      var txnRes = await Catetin.supabase.from('transactions').insert({
+        id: txnId,
+        user_id: Catetin.state.user.id,
+        occurred_at: result.paid_at,
+        type: result.txnType,
+        amount: remaining,
+        category: result.category,
+        payment_source: result.payment_source,
+        note: (direction === 'owed_to_me' ? 'Repayment from ' : 'Repaid to ') + person.name,
+        is_recurring: false,
+        trip_id: null
+      });
+      if (txnRes.error) { Catetin.toast('Failed to record transaction'); break; }
+    }
+
+    var payRes = await Catetin.supabase.from('debt_payments').insert({
+      user_id: Catetin.state.user.id,
+      debt_id: debt.id,
+      amount: remaining,
+      paid_at: result.paid_at,
+      payment_source: result.payment_source,
+      transaction_id: txnId
+    });
+    if (payRes.error) {
+      if (txnId) await Catetin.supabase.from('transactions').delete().eq('id', txnId);
+      Catetin.toast('Failed to save payment');
+      break;
+    }
+  }
+
+  await Catetin.reloadAll();
+  if (Catetin.router.current === 'dashboard') Catetin.renderHomeDebts();
+  else if (Catetin.router.current === 'debts') Catetin.renderDebts();
+  else if (Catetin.router.current === 'debt-detail') Catetin.renderDebtDetail();
+  Catetin.toast(person.name + ' marked as paid');
 };
 
 Catetin.editDebt = async function (debtId) {

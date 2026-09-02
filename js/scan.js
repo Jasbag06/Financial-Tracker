@@ -114,7 +114,7 @@ Catetin.scan.renderItems = function () {
   var el = document.getElementById('scan-items-list');
   el.innerHTML = Catetin.scan.items.map(function (item, i) {
     return '<div class="item-row"><input type="text" value="' + Catetin.escapeHtml(item.name) + '" data-item-name="' + i + '">'
-      + '<input type="number" class="mono item-amt" value="' + item.amount + '" data-item-amt="' + i + '">'
+      + '<input type="number" inputmode="numeric" class="mono item-amt" value="' + item.amount + '" data-item-amt="' + i + '">'
       + '<button type="button" class="item-remove" data-item-remove="' + i + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>';
   }).join('');
 

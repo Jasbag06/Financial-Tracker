@@ -145,7 +145,7 @@ Catetin.modal.addBudget = function (categories) {
     var sheet = Catetin.modal._show(
       '<p class="modal-title">Add Category Budget</p>'
       + '<select id="modal-budget-cat" class="modal-input">' + categories.map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('') + '</select>'
-      + '<input type="number" id="modal-budget-amount" class="modal-input" placeholder="Amount" min="0" step="1000">'
+      + '<input type="number" inputmode="numeric" id="modal-budget-amount" class="modal-input" placeholder="Amount" min="0" step="1000">'
       + '<div class="modal-actions">'
       + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
       + '<button type="button" class="cta" id="modal-ok">Add</button>'
@@ -173,7 +173,7 @@ Catetin.modal.editBudget = function (budget) {
     var sheet = Catetin.modal._show(
       '<p class="modal-title">Edit Budget</p>'
       + '<div class="row" style="margin-bottom:16px;"><div class="icon-chip" style="background:var(--surface-2);">' + (cat ? cat.icon : '💸') + '</div><span style="font-weight:700;font-size:14.5px;">' + Catetin.escapeHtml(budget.category) + '</span></div>'
-      + '<input type="number" id="modal-budget-amount" class="modal-input" value="' + Number(budget.amount) + '" placeholder="Amount" min="0" step="1000">'
+      + '<input type="number" inputmode="numeric" id="modal-budget-amount" class="modal-input" value="' + Number(budget.amount) + '" placeholder="Amount" min="0" step="1000">'
       + '<div class="modal-actions">'
       + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
       + '<button type="button" class="cta" id="modal-ok">Save</button>'
@@ -210,7 +210,7 @@ Catetin.modal.editAccount = function (acct) {
       + kinds.map(function (k) { return '<button type="button" class="chip' + (k[0] === kind ? ' active' : '') + '" data-kind="' + k[0] + '">' + k[1] + '</button>'; }).join('')
       + '</div>'
       + '<input type="text" id="modal-acct-number" class="modal-input" value="' + Catetin.escapeHtml(acct.account_number || '') + '" placeholder="Account/card number (optional)">'
-      + '<input type="number" id="modal-acct-balance" class="modal-input" value="' + Number(acct.initial_balance) + '" placeholder="Starting balance">'
+      + '<input type="number" inputmode="numeric" id="modal-acct-balance" class="modal-input" value="' + Number(acct.initial_balance) + '" placeholder="Starting balance">'
       + '<div class="color-pick" id="modal-acct-color" style="margin-bottom:16px;">'
       + colors.map(function (c) { return '<button type="button" class="swatch' + (c === color ? ' active' : '') + '" data-color="' + c + '" style="background:var(--' + c + ');"></button>'; }).join('')
       + '</div>'
@@ -288,6 +288,66 @@ Catetin.modal.editTrip = function (trip) {
   });
 };
 
+// One-tap "it's all paid" for the common case, matching how invoicing tools
+// treat "Mark as paid": settling in full is the fast path, and partial
+// instalments stay behind the per-debt Record Payment flow.
+Catetin.modal.settlePerson = function (person, direction) {
+  return new Promise(function (resolve) {
+    var incoming = direction === 'owed_to_me';
+    var txnType = incoming ? 'income' : 'expense';
+    var open = person.debts.filter(function (d) { return Catetin.debtRemaining(d) > 0; });
+    var cats = Catetin.state.categories.filter(function (c) { return c.type === txnType; });
+    var accounts = Catetin.state.accounts;
+    var canRecord = cats.length > 0 && accounts.length > 0;
+
+    var lastAcct = open.length ? open[0].payment_source : null;
+    var acctOptions = accounts.map(function (a) {
+      return '<option value="' + Catetin.escapeHtml(a.name) + '"' + (a.name === lastAcct ? ' selected' : '') + '>' + Catetin.escapeHtml(a.name) + '</option>';
+    }).join('');
+    var catOptions = cats.map(function (c) { return '<option value="' + Catetin.escapeHtml(c.name) + '">' + c.icon + ' ' + Catetin.escapeHtml(c.name) + '</option>'; }).join('');
+
+    var sheet = Catetin.modal._show(
+      '<p class="modal-title">Mark as fully paid?</p>'
+      + '<p class="modal-msg">' + Catetin.escapeHtml(person.name) + ' · ' + Catetin.fmtRp(person.outstanding)
+      + (open.length > 1 ? ' across ' + open.length + ' debts' : '') + '</p>'
+      + '<label class="modal-label" for="modal-settle-date">Date paid</label>'
+      + '<input type="date" id="modal-settle-date" class="modal-input" value="' + new Date().toISOString().slice(0, 10) + '">'
+      + (accounts.length ? '<label class="modal-label" for="modal-settle-acct">' + (incoming ? 'Received into' : 'Paid from') + '</label><select id="modal-settle-acct" class="modal-input">' + acctOptions + '</select>' : '')
+      + (canRecord
+        ? '<label class="modal-check" for="modal-settle-record"><input type="checkbox" id="modal-settle-record" checked>'
+          + '<span>Also record as ' + txnType + '<br><span class="muted" style="font-size:11px;font-weight:400;">Keeps your account balance accurate</span></span></label>'
+          + '<select id="modal-settle-cat" class="modal-input">' + catOptions + '</select>'
+        : '')
+      + '<div class="modal-actions">'
+      + '<button type="button" class="cta ghost" id="modal-cancel">Cancel</button>'
+      + '<button type="button" class="cta mint" id="modal-ok">Mark Paid</button>'
+      + '</div>',
+      function () { resolve(null); }
+    );
+
+    var recordBox = sheet.querySelector('#modal-settle-record');
+    var catSelect = sheet.querySelector('#modal-settle-cat');
+    if (recordBox && catSelect) {
+      var syncCat = function () { catSelect.hidden = !recordBox.checked; };
+      recordBox.addEventListener('change', syncCat);
+      syncCat();
+    }
+
+    sheet.querySelector('#modal-cancel').addEventListener('click', function () { Catetin.modal._hide(); resolve(null); });
+    sheet.querySelector('#modal-ok').addEventListener('click', function () {
+      var acctEl = sheet.querySelector('#modal-settle-acct');
+      Catetin.modal._hide();
+      resolve({
+        paid_at: sheet.querySelector('#modal-settle-date').value || new Date().toISOString().slice(0, 10),
+        payment_source: acctEl ? acctEl.value : null,
+        recordTransaction: !!(recordBox && recordBox.checked),
+        category: catSelect ? catSelect.value : null,
+        txnType: txnType
+      });
+    });
+  });
+};
+
 // `paidSoFar` is passed in so the amount can't be edited down below what has
 // already been repaid, which would leave the debt permanently over-settled.
 Catetin.modal.editDebt = function (debt, paidSoFar) {
@@ -302,7 +362,7 @@ Catetin.modal.editDebt = function (debt, paidSoFar) {
       + '<input type="text" id="modal-debt-person" class="modal-input" value="' + Catetin.escapeHtml(debt.person_name) + '" autocomplete="off">'
       + '<div class="chip-row" id="modal-debt-suggest" style="margin:-8px 0 16px;"></div>'
       + '<label class="modal-label" for="modal-debt-amount">Amount</label>'
-      + '<input type="number" id="modal-debt-amount" class="modal-input" value="' + Number(debt.amount) + '" min="0" step="1000">'
+      + '<input type="number" inputmode="numeric" id="modal-debt-amount" class="modal-input" value="' + Number(debt.amount) + '" min="0" step="1000">'
       + '<label class="modal-label" for="modal-debt-note">What for</label>'
       + '<input type="text" id="modal-debt-note" class="modal-input" value="' + Catetin.escapeHtml(debt.note || '') + '" placeholder="Optional">'
       + '<label class="modal-label" for="modal-debt-date">Date</label>'
@@ -370,7 +430,7 @@ Catetin.modal.recordPayment = function (debt, remaining) {
     var sheet = Catetin.modal._show(
       '<p class="modal-title">Record Payment</p>'
       + '<p class="modal-msg">' + Catetin.escapeHtml(debt.person_name) + ' · ' + Catetin.fmtRp(remaining) + ' still ' + (incoming ? 'owed' : 'to pay') + '</p>'
-      + '<input type="number" id="modal-pay-amount" class="modal-input" value="' + remaining + '" min="0" step="1000" placeholder="Amount">'
+      + '<input type="number" inputmode="numeric" id="modal-pay-amount" class="modal-input" value="' + remaining + '" min="0" step="1000" placeholder="Amount">'
       + '<input type="date" id="modal-pay-date" class="modal-input" value="' + new Date().toISOString().slice(0, 10) + '">'
       + (accounts.length ? '<select id="modal-pay-acct" class="modal-input">' + acctOptions + '</select>' : '')
       + (canRecord
@@ -429,7 +489,7 @@ Catetin.modal.editTransaction = function (t) {
       + '<button type="button" class="opt' + (t.type === 'expense' ? ' active' : '') + '" data-type="expense" style="' + (t.type === 'expense' ? 'color:var(--coral-ink);' : '') + '">Expense</button>'
       + '<button type="button" class="opt' + (t.type === 'income' ? ' active' : '') + '" data-type="income" style="' + (t.type === 'income' ? 'color:var(--mint-ink);' : '') + '">Income</button>'
       + '</div>'
-      + '<input type="number" id="modal-amt" class="modal-input" value="' + Number(t.amount) + '" placeholder="Amount">'
+      + '<input type="number" inputmode="numeric" id="modal-amt" class="modal-input" value="' + Number(t.amount) + '" placeholder="Amount">'
       + '<select id="modal-cat" class="modal-input">' + categoryOptions(t.type) + '</select>'
       + '<select id="modal-acct" class="modal-input">' + acctOptions + '</select>'
       + '<input type="date" id="modal-date" class="modal-input" value="' + t.occurred_at + '">'
